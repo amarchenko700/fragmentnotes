@@ -14,12 +14,12 @@ import androidx.fragment.app.Fragment;
 
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
-import com.example.fragmentnotes.domain.NotesRepo;
+import com.example.fragmentnotes.impl.NotesRepoImpl;
 
 public class NoteEditFragment extends Fragment {
 
     private NoteEntity noteEntity;
-    private NotesRepo notesRepo;
+    private NotesRepoImpl notesRepo;
 
     private EditText titleEditText;
     private EditText detailEditText;
@@ -30,9 +30,9 @@ public class NoteEditFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if(context instanceof ControllerNoteEdit){
+        if (context instanceof ControllerNoteEdit) {
             controllerNoteEdit = (ControllerNoteEdit) context;
-        }else {
+        } else {
             throw new IllegalStateException("Activity must implement NoteEditFragment.ControllerNoteEdit");
         }
     }
@@ -47,18 +47,28 @@ public class NoteEditFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initTextView(view);
-        /* Если заполнять здесь, то при первом открытии заметки будет ок, а при открытии
-        всех последующих на экране будет отображаться самая первая открытая заметка. Почему?
-        Приходится метод fillNote() переносить в onStart() или в onResume() - только так работает.
-        fillNote();
-        */
         saveButton.setOnClickListener(v -> saveNote());
+
     }
 
     @Override
     public void onStart() {
         super.onStart();
         fillNote();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        controllerNoteEdit = null;
+    }
+
+    public void setNotesRepo(NotesRepoImpl notesRepo) {
+        this.notesRepo = notesRepo;
+    }
+
+    public void setNoteEntity(NoteEntity noteEntity) {
+        this.noteEntity = noteEntity;
     }
 
     private void initTextView(View view) {
@@ -76,24 +86,17 @@ public class NoteEditFragment extends Fragment {
         noteEntity.setDescription(detailEditText.getText().toString());
         noteEntity.setTitle(titleEditText.getText().toString());
         notesRepo.editNote(noteEntity.getId(), noteEntity);
-        controllerNoteEdit.openNotesList();
-    }
-
-    public void setNotesRepo(NotesRepo notesRepo) {
-        this.notesRepo = notesRepo;
-    }
-
-    public void setNoteEntity(NoteEntity noteEntity) {
-        this.noteEntity = noteEntity;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        controllerNoteEdit = null;
+        controllerNoteEdit.openNotesList(notesRepo);
     }
 
     public interface ControllerNoteEdit {
-        void openNotesList();
+        void openNotesList(NotesRepoImpl notesRepo);
+    }
+
+    public static NoteEditFragment newInstance(NoteEntity noteEntity, NotesRepoImpl notesRepo) {
+        NoteEditFragment fragment = new NoteEditFragment();
+        fragment.setNotesRepo(notesRepo);
+        fragment.setNoteEntity(noteEntity);
+        return fragment;
     }
 }
