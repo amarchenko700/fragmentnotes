@@ -1,5 +1,8 @@
 package com.example.fragmentnotes.impl;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.annotation.Nullable;
 
 
@@ -9,9 +12,12 @@ import com.example.fragmentnotes.domain.NotesRepo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotesRepoImpl implements NotesRepo {
-    private final ArrayList<NoteEntity> cache = new ArrayList<>();
+public class NotesRepoImpl implements NotesRepo, Parcelable {
+    private ArrayList<NoteEntity> cache = new ArrayList<>();
     private int counter = 0;
+
+    public NotesRepoImpl() {
+    }
 
     @Override
     public List<NoteEntity> getNotes() {
@@ -53,5 +59,33 @@ public class NotesRepoImpl implements NotesRepo {
         //cache.add(note);
         cache.set(id, note);
         return true;
+    }
+
+    public NotesRepoImpl(Parcel in) {
+        cache = in.createTypedArrayList(NoteEntity.CREATOR);
+        counter = in.readInt();
+    }
+
+    public static final Creator<NotesRepoImpl> CREATOR = new Creator<NotesRepoImpl>() {
+        @Override
+        public NotesRepoImpl createFromParcel(Parcel in) {
+            return new NotesRepoImpl(in);
+        }
+
+        @Override
+        public NotesRepoImpl[] newArray(int size) {
+            return new NotesRepoImpl[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(cache);
+        dest.writeInt(counter);
     }
 }
