@@ -17,7 +17,8 @@ public class NoteEntity implements Parcelable {
     }
 
     public NoteEntity(){
-
+        title = "";
+        description = "";
     }
 
     @Nullable
