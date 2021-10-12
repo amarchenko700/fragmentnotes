@@ -2,4 +2,7 @@
     <string name="app_name">FragmentNotes</string>
     <string name="toolbar_name">Заметки</string>
     <string name="title_add_note">Создать заметку</string>
+    <string name="settings">Настройки</string>
+    <string name="about">О приложении</string>
+    <string name="profile">Профиль</string>
 </resources>
