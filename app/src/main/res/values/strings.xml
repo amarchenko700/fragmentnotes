@@ -5,4 +5,9 @@
     <string name="settings">Настройки</string>
     <string name="about">О приложении</string>
     <string name="profile">Профиль</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="text_about_fragment">Это описание моего приложения "Заметки"</string>
+    <string name="text_settings_fragment">Это настройки моего приложения "Заметки"</string>
+    <string name="text_profile_fragment">Это профили моего приложения "Заметки"</string>
+    <string name="list_notes">Заметки</string>
 </resources>
