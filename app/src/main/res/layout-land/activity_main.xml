@@ -43,6 +43,7 @@
         android:id="@+id/bottom_nav_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:menu="@menu/main_nav_menu"/>
+        app:menu="@menu/main_nav_menu"
+        app:itemIconTint="@color/color_selector"/>
 
 </LinearLayout>

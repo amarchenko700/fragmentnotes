@@ -8,4 +8,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="toolbar_background">#DAD0B3</color>
+    <color name="color_inactive_nav_buttons">#FFDDAB</color>
+    <color name="color_active_nav_buttons">#C47707</color>
 </resources>
