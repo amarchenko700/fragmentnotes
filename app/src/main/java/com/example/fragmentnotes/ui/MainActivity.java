@@ -22,6 +22,10 @@ import com.example.fragmentnotes.ui.NoteListFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity implements NoteListFragment.ControllerNoteList,
         NoteEditFragment.ControllerNoteEdit {
 
@@ -35,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private FragmentManager fragmentManager;
     private int listLayout;
     private int noteLayout;
+    private final Map<Integer, Fragment> fragments = createFragments();
     /*
     Здесь не могу пользоваться типом NotesRepo, как в уроке, т.к. ругается что он не Parcelable.
     Как сделать так, чтобы интерфейс понимался как Parcelable?
@@ -65,6 +70,16 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                     .remove(noteEditFragment)
                     .commit();
         }
+    }
+
+    private Map<Integer, Fragment> createFragments(){
+        Map<Integer, Fragment> fragments = new HashMap<>();
+
+        fragments.put(R.id.about, new AboutFragment());
+        fragments.put(R.id.settings, new SettingsFragment());
+        fragments.put(R.id.profile, new ProfileFragment());
+
+        return fragments;
     }
 
     @Override
@@ -134,24 +149,13 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private void initBottomNavigation() {
         bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.settings: {
-                    openAdditionalFragment(SettingsFragment.newInstance());
-                    break;
-                }
-                case R.id.about: {
-                    openAdditionalFragment(AboutFragment.newInstance());
-                    break;
-                }
-                case R.id.profile: {
-                    openAdditionalFragment(ProfileFragment.newInstance());
-                    break;
-                }
-                case R.id.list_notes: {
-                    openNotesList(notesRepo);
-                    break;
-                }
-
+            if(item.getItemId() == R.id.list_notes){
+                openNotesList(notesRepo);
+            }else {
+                fragmentManager
+                        .beginTransaction()
+                        .replace(R.id.container_additional_fragments, Objects.requireNonNull(fragments.get(item.getItemId())), MainActivity.ADDITIONAL_FRAGMENT_TAG)
+                        .commit();
             }
             return true;
         });
