@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fragmentnotes.domain.NoteEntity;
-import com.example.fragmentnotes.domain.NoteEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
     private List<NoteEntity> data = new ArrayList<>();
     private onItemClickListener clickListener = null;
 
-    public void setData(List<NoteEntity> data){
+    public void setData(List<NoteEntity> data) {
         this.data = data;
         notifyDataSetChanged();
     }
@@ -32,7 +31,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
         holder.bind(getItem(position));
     }
 
-    private NoteEntity getItem(int position){
+    private NoteEntity getItem(int position) {
         return data.get(position);
     }
 
@@ -45,7 +44,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
         clickListener = listener;
     }
 
-    interface onItemClickListener{
+    interface onItemClickListener {
         void onItemClick(NoteEntity item);
     }
 }
