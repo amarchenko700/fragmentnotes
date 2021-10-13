@@ -161,12 +161,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         });
     }
 
-    private void openAdditionalFragment(Fragment fragment){
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.container_additional_fragments, fragment, MainActivity.ADDITIONAL_FRAGMENT_TAG);
-        transaction.commit();
-    }
-
     private NoteListFragment getNoteListFragment() {
         NoteListFragment noteListFragment = (NoteListFragment) fragmentManager.findFragmentByTag(NOTE_LIST_TAG);
         if (noteListFragment == null) {
