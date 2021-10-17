@@ -1,26 +1,21 @@
 package com.example.fragmentnotes.ui;
 
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
-import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
-import com.example.fragmentnotes.ui.NoteEditFragment;
-import com.example.fragmentnotes.ui.NoteListFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         }
     }
 
-    private Map<Integer, Fragment> createFragments(){
+    private Map<Integer, Fragment> createFragments() {
         Map<Integer, Fragment> fragments = new HashMap<>();
 
         fragments.put(R.id.about, new AboutFragment());
@@ -100,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         if (item.getItemId() == R.id.new_note_menu) {
             openNoteItem(notesRepo.createNote(new NoteEntity()));
             return true;
+        } else if (item.getItemId() == R.id.clear_note_menu) {
+            notesRepo.clearAll();
+            getNoteListFragment().setRecyclerViewAdapterData();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -149,9 +147,9 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private void initBottomNavigation() {
         bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            if(item.getItemId() == R.id.list_notes){
+            if (item.getItemId() == R.id.list_notes) {
                 openNotesList(notesRepo);
-            }else {
+            } else {
                 fragmentManager
                         .beginTransaction()
                         .replace(R.id.container_additional_fragments, Objects.requireNonNull(fragments.get(item.getItemId())), MainActivity.ADDITIONAL_FRAGMENT_TAG)
@@ -175,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public void openNotesList(NotesRepoImpl notesRepo) {
         Fragment additionalFragment = fragmentManager.findFragmentByTag(MainActivity.ADDITIONAL_FRAGMENT_TAG);
-        if(additionalFragment != null){
+        if (additionalFragment != null) {
             fragmentManager
                     .beginTransaction()
                     .remove(additionalFragment)
