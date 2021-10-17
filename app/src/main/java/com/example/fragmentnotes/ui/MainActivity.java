@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
     private FragmentManager fragmentManager;
+    private NoteListFragment noteListFragment;
     private int listLayout;
     private int noteLayout;
     private final Map<Integer, Fragment> fragments = createFragments();
@@ -49,11 +50,13 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         setNoteRepository(savedInstanceState);
 
         fragmentManager = getSupportFragmentManager();
+        noteListFragment = NoteListFragment.newInstance(notesRepo);
+        noteListFragment.setRecyclerViewAdapterData();
         initToolbar();
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
         initLayouts();
         initBottomNavigation();
-        openNotesList(notesRepo);
+        openNotesList();
         removeNoteEditFragment();
     }
 
@@ -107,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
             return true;
         } else if (item.getItemId() == R.id.clear_note_menu) {
             notesRepo.clearAll();
-            getNoteListFragment().setRecyclerViewAdapterData();
+            noteListFragment.setRecyclerViewAdapterData();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -158,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.list_notes) {
-                openNotesList(notesRepo);
+                openNotesList();
             } else {
                 fragmentManager
                         .beginTransaction()
@@ -169,27 +172,19 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         });
     }
 
-    private NoteListFragment getNoteListFragment() {
-        NoteListFragment noteListFragment = (NoteListFragment) fragmentManager.findFragmentByTag(NOTE_LIST_TAG);
-        if (noteListFragment == null) {
-            noteListFragment = NoteListFragment.newInstance(notesRepo);
-        } else {
-            noteListFragment.setNotesRepo(notesRepo);
-        }
-        noteListFragment.setRecyclerViewAdapterData();
-        return noteListFragment;
-    }
-
-    @Override
-    public void openNotesList(NotesRepoImpl notesRepo) {
+    private void openNotesList() {
         removeAdditionalFragment();
 
-        NoteListFragment noteListFragment = getNoteListFragment();
         fragmentManager
                 .beginTransaction()
                 .replace(listLayout, noteListFragment, NOTE_LIST_TAG)
                 .commit();
+    }
 
+    @Override
+    public void createdNote(NoteEntity noteEntity){
+        noteListFragment.setCreatedNoteEntity(noteEntity);
+        openNotesList();
     }
 
     @Override
