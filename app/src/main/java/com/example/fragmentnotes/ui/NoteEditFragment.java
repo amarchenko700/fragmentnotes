@@ -48,7 +48,6 @@ public class NoteEditFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         initTextView(view);
         saveButton.setOnClickListener(v -> saveNote());
-
     }
 
     @Override
