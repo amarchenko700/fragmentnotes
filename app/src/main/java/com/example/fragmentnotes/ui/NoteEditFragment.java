@@ -85,7 +85,7 @@ public class NoteEditFragment extends Fragment {
     private void saveNote() {
         noteEntity.setDescription(detailEditText.getText().toString());
         noteEntity.setTitle(titleEditText.getText().toString());
-        notesRepo.editNote(noteEntity.getId(), noteEntity);
+        notesRepo.editNote(noteEntity);
         controllerNoteEdit.openNotesList(notesRepo);
     }
 
