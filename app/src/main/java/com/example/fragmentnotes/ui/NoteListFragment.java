@@ -2,6 +2,7 @@ package com.example.fragmentnotes.ui;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
+
+import java.util.List;
 
 public class NoteListFragment extends Fragment {
 
@@ -59,16 +62,6 @@ public class NoteListFragment extends Fragment {
 
     public void setNotesRepo(NotesRepoImpl notesRepo) {
         this.notesRepo = notesRepo;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.new_note_menu) {
-            NoteEntity newNote = notesRepo.createNote(new NoteEntity());
-            onItemClick(notesRepo.getNote(newNote));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private void onItemClick(NoteEntity item) {
