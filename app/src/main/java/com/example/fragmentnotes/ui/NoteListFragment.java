@@ -28,8 +28,8 @@ public class NoteListFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private NotesAdapter adapter = new NotesAdapter();
-    private NoteEntity noteEntity;
-    private NotesRepoImpl notesRepo;
+    private NoteEntity createdNoteEntity;
+    private final NotesRepoImpl notesRepo;
     private ControllerNoteList controllerNoteList;
 
     @Override
@@ -52,6 +52,9 @@ public class NoteListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initRecyclerView();
+        if(createdNoteEntity != null){
+            scrollToLast();
+        }
     }
 
     @Override
@@ -60,8 +63,12 @@ public class NoteListFragment extends Fragment {
         super.onDestroy();
     }
 
-    public void setNotesRepo(NotesRepoImpl notesRepo) {
+    public NoteListFragment(NotesRepoImpl notesRepo) {
         this.notesRepo = notesRepo;
+    }
+
+    public void setCreatedNoteEntity(NoteEntity createdNoteEntity) {
+        this.createdNoteEntity = createdNoteEntity;
     }
 
     private void onItemClick(NoteEntity item) {
@@ -80,13 +87,19 @@ public class NoteListFragment extends Fragment {
         adapter.setData(notesRepo.getNotes());
     }
 
+    public void scrollToLast(){
+        int index = notesRepo.getNotes().size() - 1;
+        adapter.notifyItemInserted(index);
+        recyclerView.scrollToPosition(index);
+        createdNoteEntity = null;
+    }
+
     public interface ControllerNoteList {
         void openNoteItem(NoteEntity item);
     }
 
     public static NoteListFragment newInstance(NotesRepoImpl notesRepository) {
-        NoteListFragment fragment = new NoteListFragment();
-        fragment.setNotesRepo(notesRepository);
+        NoteListFragment fragment = new NoteListFragment(notesRepository);
         return fragment;
     }
 
