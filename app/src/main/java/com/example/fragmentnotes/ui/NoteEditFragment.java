@@ -85,11 +85,11 @@ public class NoteEditFragment extends Fragment {
         noteEntity.setDescription(detailEditText.getText().toString());
         noteEntity.setTitle(titleEditText.getText().toString());
         notesRepo.editNote(noteEntity);
-        controllerNoteEdit.openNotesList(notesRepo);
+        controllerNoteEdit.createdNote(noteEntity);
     }
 
     public interface ControllerNoteEdit {
-        void openNotesList(NotesRepoImpl notesRepo);
+        void createdNote(NoteEntity noteEntity);
     }
 
     public static NoteEditFragment newInstance(NoteEntity noteEntity, NotesRepoImpl notesRepo) {
