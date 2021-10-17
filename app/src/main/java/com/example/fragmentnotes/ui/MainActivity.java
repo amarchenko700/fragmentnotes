@@ -67,6 +67,16 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         }
     }
 
+    private void removeAdditionalFragment() {
+        Fragment additionalFragment = fragmentManager.findFragmentByTag(MainActivity.ADDITIONAL_FRAGMENT_TAG);
+        if (additionalFragment != null) {
+            fragmentManager
+                    .beginTransaction()
+                    .remove(additionalFragment)
+                    .commit();
+        }
+    }
+
     private Map<Integer, Fragment> createFragments() {
         Map<Integer, Fragment> fragments = new HashMap<>();
 
@@ -172,17 +182,14 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     @Override
     public void openNotesList(NotesRepoImpl notesRepo) {
-        Fragment additionalFragment = fragmentManager.findFragmentByTag(MainActivity.ADDITIONAL_FRAGMENT_TAG);
-        if (additionalFragment != null) {
-            fragmentManager
-                    .beginTransaction()
-                    .remove(additionalFragment)
-                    .commit();
-        }
+        removeAdditionalFragment();
+
+        NoteListFragment noteListFragment = getNoteListFragment();
         fragmentManager
                 .beginTransaction()
-                .replace(listLayout, getNoteListFragment(), NOTE_LIST_TAG)
+                .replace(listLayout, noteListFragment, NOTE_LIST_TAG)
                 .commit();
+
     }
 
     @Override
