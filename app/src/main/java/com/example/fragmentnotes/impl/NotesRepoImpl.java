@@ -42,9 +42,10 @@ public class NotesRepoImpl implements NotesRepo, Parcelable {
     }
 
     @Override
-    public boolean removeNote(Integer id) {
+    public boolean removeNote(NoteEntity note) {
+        int index = cache.indexOf(note);
         for (int i = 0; i < cache.size(); i++) {
-            if(cache.get(i).getId() == id){
+            if(cache.get(i).getId() == index){
                 cache.remove(i);
                 return true;
             }
