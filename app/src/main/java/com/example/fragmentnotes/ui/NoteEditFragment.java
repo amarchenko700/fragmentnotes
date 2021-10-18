@@ -20,6 +20,7 @@ public class NoteEditFragment extends Fragment {
 
     private NoteEntity noteEntity;
     private NotesRepoImpl notesRepo;
+    private boolean isNew;
 
     private EditText titleEditText;
     private EditText detailEditText;
@@ -62,12 +63,13 @@ public class NoteEditFragment extends Fragment {
         controllerNoteEdit = null;
     }
 
-    public void setNotesRepo(NotesRepoImpl notesRepo) {
-        this.notesRepo = notesRepo;
+    public NoteEditFragment() {
     }
 
-    public void setNoteEntity(NoteEntity noteEntity) {
+    public NoteEditFragment(NoteEntity noteEntity, NotesRepoImpl notesRepo, boolean isNew) {
         this.noteEntity = noteEntity;
+        this.notesRepo = notesRepo;
+        this.isNew = isNew;
     }
 
     private void initTextView(View view) {
@@ -84,18 +86,20 @@ public class NoteEditFragment extends Fragment {
     private void saveNote() {
         noteEntity.setDescription(detailEditText.getText().toString());
         noteEntity.setTitle(titleEditText.getText().toString());
-        notesRepo.editNote(noteEntity);
-        controllerNoteEdit.createdNote(noteEntity);
+        if(isNew){
+            notesRepo.createNote(noteEntity);
+        }else {
+            notesRepo.editNote(noteEntity);
+        }
+        controllerNoteEdit.saveItem(noteEntity, isNew);
     }
 
     public interface ControllerNoteEdit {
-        void createdNote(NoteEntity noteEntity);
+        void saveItem(NoteEntity noteEntity, boolean isNew);
     }
 
-    public static NoteEditFragment newInstance(NoteEntity noteEntity, NotesRepoImpl notesRepo) {
-        NoteEditFragment fragment = new NoteEditFragment();
-        fragment.setNotesRepo(notesRepo);
-        fragment.setNoteEntity(noteEntity);
-        return fragment;
+    public static NoteEditFragment newInstance(NoteEntity noteEntity, NotesRepoImpl notesRepo,
+                                               boolean isNew) {
+        return new NoteEditFragment(noteEntity, notesRepo, isNew);
     }
 }
