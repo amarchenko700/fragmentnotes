@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private static final String NOTE_LIST_TAG = "NOTE_LIST_TAG";
     private static final String NOTE_EDIT_TAG = "NOTE_EDIT_TAG";
     private static final String ADDITIONAL_FRAGMENT_TAG = "ADDITIONAL_FRAGMENT_TAG";
+    private static final String ACTIVE_NOTE_KEY = "ACTIVE_NOTE_KEY";
+    private static final String POSITION_NOTE_KEY = "POSITION_NOTE_KEY";
     private boolean isLandscape;
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private int positionNote;
     private int listLayout;
     private int noteLayout;
+    private NoteEntity activeNote;
     private final Map<Integer, Fragment> fragments = createFragments();
     /*
     Здесь не могу пользоваться типом NotesRepo, как в уроке, т.к. ругается что он не Parcelable.
@@ -49,15 +52,19 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         setContentView(R.layout.activity_main);
 
         setNoteRepository(savedInstanceState);
+        setActiveNote(savedInstanceState);
 
         fragmentManager = getSupportFragmentManager();
-        noteListFragment = NoteListFragment.newInstance(notesRepo);
-        //noteListFragment.notifyDataChanged();
+        noteListFragment = NoteListFragment.newInstance();
         initToolbar();
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
         initLayouts();
         initBottomNavigation();
-        openNotesList();
+        if (activeNote == null) {
+            openNotesList();
+        } else {
+            openNoteItem(activeNote, positionNote, false);
+        }
         removeNoteEditFragment();
     }
 
@@ -95,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(REPO_KEY, notesRepo);
+        outState.putParcelable(ACTIVE_NOTE_KEY, activeNote);
+        outState.putInt(POSITION_NOTE_KEY, positionNote);
     }
 
     @Override
@@ -121,6 +130,13 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
             notesRepo = fillRepoByTestValuesRepo();
         } else {
             notesRepo = savedInstanceState.getParcelable(REPO_KEY);
+        }
+    }
+
+    private void setActiveNote(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            activeNote = savedInstanceState.getParcelable(ACTIVE_NOTE_KEY);
+            positionNote = savedInstanceState.getInt(POSITION_NOTE_KEY);
         }
     }
 
@@ -183,15 +199,14 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     @Override
-    public void saveItem(NoteEntity noteEntity, boolean isNew){
-        noteListFragment.setCreatedNoteEntity(noteEntity);
-        if (isNew){
-            noteListFragment.notifyItemInserted(positionNote);
+    public void saveItem(NoteEntity noteEntity, boolean isNew) {
+        if (isLandscape) {
+            if (isNew) {
+                noteListFragment.notifyItemInserted(positionNote);
+            } else {
+                noteListFragment.notifyItemChanged(positionNote);
+            }
         }else {
-            noteListFragment.notifyItemChanged(positionNote);
-        }
-
-        if(!isLandscape){
             openNotesList();
         }
     }
@@ -204,6 +219,17 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                 .replace(noteLayout, NoteEditFragment.newInstance(item, notesRepo, isNew), NOTE_EDIT_TAG)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Override
+    public NotesRepoImpl getRepo() {
+        return notesRepo;
+    }
+
+    @Override
+    public void setActiveNote(NoteEntity activeNote, int position) {
+        this.activeNote = activeNote;
+        this.positionNote = position;
     }
 
 }
