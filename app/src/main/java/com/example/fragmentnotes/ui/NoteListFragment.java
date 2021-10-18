@@ -20,13 +20,17 @@ import com.example.fragmentnotes.impl.NotesRepoImpl;
 
 public class NoteListFragment extends Fragment {
 
-    private static final String KEY_REPO = "KEY_REPO";
-    private RecyclerView recyclerView;
     private final NotesAdapter adapter = new NotesAdapter();
+    private RecyclerView recyclerView;
     private NotesRepoImpl notesRepo;
     private ControllerNoteList controllerNoteList;
     private NoteEntity clickedNote;
     private int indexClicked;
+
+    public static NoteListFragment newInstance() {
+        NoteListFragment fragment = new NoteListFragment();
+        return fragment;
+    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -118,13 +122,10 @@ public class NoteListFragment extends Fragment {
 
     public interface ControllerNoteList {
         void openNoteItem(NoteEntity item, int position, boolean isNew);
-        NotesRepoImpl getRepo();
-        void setActiveNote(NoteEntity activeNote, int position);
-    }
 
-    public static NoteListFragment newInstance() {
-        NoteListFragment fragment = new NoteListFragment();
-        return fragment;
+        NotesRepoImpl getRepo();
+
+        void setActiveNote(NoteEntity activeNote, int position);
     }
 
 }
