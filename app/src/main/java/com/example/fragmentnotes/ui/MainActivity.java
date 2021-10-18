@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private BottomNavigationView bottomNavigationView;
     private FragmentManager fragmentManager;
     private NoteListFragment noteListFragment;
+    private int positionNote;
     private int listLayout;
     private int noteLayout;
     private final Map<Integer, Fragment> fragments = createFragments();
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
         fragmentManager = getSupportFragmentManager();
         noteListFragment = NoteListFragment.newInstance(notesRepo);
-        noteListFragment.setRecyclerViewAdapterData();
+        //noteListFragment.notifyDataChanged();
         initToolbar();
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
         initLayouts();
@@ -106,11 +107,11 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.new_note_menu) {
-            openNoteItem(notesRepo.createNote(new NoteEntity()));
+            openNoteItem(new NoteEntity(), notesRepo.getNotes().size(), true);
             return true;
         } else if (item.getItemId() == R.id.clear_note_menu) {
             notesRepo.clearAll();
-            noteListFragment.setRecyclerViewAdapterData();
+            noteListFragment.setAdapterData();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -182,16 +183,25 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     @Override
-    public void createdNote(NoteEntity noteEntity){
+    public void saveItem(NoteEntity noteEntity, boolean isNew){
         noteListFragment.setCreatedNoteEntity(noteEntity);
-        openNotesList();
+        if (isNew){
+            noteListFragment.notifyItemInserted(positionNote);
+        }else {
+            noteListFragment.notifyItemChanged(positionNote);
+        }
+
+        if(!isLandscape){
+            openNotesList();
+        }
     }
 
     @Override
-    public void openNoteItem(@Nullable NoteEntity item) {
+    public void openNoteItem(@Nullable NoteEntity item, int position, boolean isNew) {
+        positionNote = position;
         fragmentManager
                 .beginTransaction()
-                .replace(noteLayout, NoteEditFragment.newInstance(item, notesRepo), NOTE_EDIT_TAG)
+                .replace(noteLayout, NoteEditFragment.newInstance(item, notesRepo, isNew), NOTE_EDIT_TAG)
                 .addToBackStack(null)
                 .commit();
     }
