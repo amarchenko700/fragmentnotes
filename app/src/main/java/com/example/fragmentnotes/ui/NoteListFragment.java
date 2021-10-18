@@ -23,7 +23,6 @@ public class NoteListFragment extends Fragment {
     private static final String KEY_REPO = "KEY_REPO";
     private RecyclerView recyclerView;
     private final NotesAdapter adapter = new NotesAdapter();
-    private NoteEntity createdNoteEntity;
     private NotesRepoImpl notesRepo;
     private ControllerNoteList controllerNoteList;
     private NoteEntity clickedNote;
@@ -50,14 +49,9 @@ public class NoteListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         registerForContextMenu(view);
 
-        Bundle args = getArguments();
-        assert args != null;
-        notesRepo = args.getParcelable(KEY_REPO);
+        notesRepo = controllerNoteList.getRepo();
         initRecyclerView();
         setAdapterData();
-        if(createdNoteEntity != null){
-            scrollToLast();
-        }
     }
 
     @Override
@@ -74,21 +68,23 @@ public class NoteListFragment extends Fragment {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId() == R.id.delete_note && clickedNote != null){
+        if (item.getItemId() == R.id.delete_note && clickedNote != null) {
             notesRepo.removeNote(clickedNote);
             clickedNote = null;
-            //setAdapterData();
+            /*
+             Обязательно ли здесь выставлять адаптеру данные, или есть другой путь?
+             Если здесь не выставить данные, то при удалении заметки у меня работает не корректно.
+             Думал, что метода адаптера notifyItemRemoved хватит, но увы.
+             */
+            setAdapterData();
             adapter.notifyItemRemoved(indexClicked);
             return true;
         }
         return super.onContextItemSelected(item);
     }
 
-    public void setCreatedNoteEntity(NoteEntity createdNoteEntity) {
-        this.createdNoteEntity = createdNoteEntity;
-    }
-
     private void onItemClick(NoteEntity item, int position) {
+        controllerNoteList.setActiveNote(item, position);
         controllerNoteList.openNoteItem(item, position, false);
     }
 
@@ -111,31 +107,23 @@ public class NoteListFragment extends Fragment {
         adapter.setData(notesRepo.getNotes());
     }
 
-    public void notifyItemChanged(int position){
+    public void notifyItemChanged(int position) {
         adapter.notifyItemChanged(position);
     }
 
-    public void notifyItemInserted(int position){
+    public void notifyItemInserted(int position) {
         adapter.notifyItemInserted(position);
         setAdapterData();
     }
 
-    public void scrollToLast(){
-        int index = notesRepo.getNotes().size() - 1;
-        adapter.notifyItemInserted(index);
-        recyclerView.scrollToPosition(index);
-        createdNoteEntity = null;
-    }
-
     public interface ControllerNoteList {
         void openNoteItem(NoteEntity item, int position, boolean isNew);
+        NotesRepoImpl getRepo();
+        void setActiveNote(NoteEntity activeNote, int position);
     }
 
-    public static NoteListFragment newInstance(NotesRepoImpl notesRepository) {
+    public static NoteListFragment newInstance() {
         NoteListFragment fragment = new NoteListFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(KEY_REPO, notesRepository);
-        fragment.setArguments(args);
         return fragment;
     }
 
