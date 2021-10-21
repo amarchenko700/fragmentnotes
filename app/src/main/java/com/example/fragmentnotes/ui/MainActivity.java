@@ -61,10 +61,10 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         initLayouts();
         initBottomNavigation();
         removeOldNoteFragments();
-        openNewFragments();
+        openNewNoteFragments();
     }
 
-    private void openNewFragments() {
+    private void openNewNoteFragments() {
         openNotesList();
         if(activeNote != null){
             openNoteItem(activeNote, positionNote, false);
