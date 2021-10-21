@@ -43,8 +43,7 @@ public class NotesRepoImpl implements NotesRepo, Parcelable {
 
     @Override
     public boolean removeNote(NoteEntity note) {
-        cache.remove(note);
-        return true;
+        return cache.remove(note);
     }
 
     @Override
