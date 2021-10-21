@@ -16,7 +16,7 @@ import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
 
-public class NoteEditFragment extends Fragment {
+public class NoteEditFragment extends Fragment implements NoteFragments {
 
     private NoteEntity noteEntity;
     private NotesRepoImpl notesRepo;

@@ -60,20 +60,28 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
         initLayouts();
         initBottomNavigation();
-        if (activeNote == null) {
-            openNotesList();
-        } else {
-            openNoteItem(activeNote, positionNote, false);
-        }
-        removeNoteEditFragment();
+        removeOldNoteFragments();
+        openNewFragments();
     }
 
-    private void removeNoteEditFragment() {
-        NoteEditFragment noteEditFragment = (NoteEditFragment) fragmentManager.findFragmentByTag(NOTE_EDIT_TAG);
-        if (!isLandscape && noteEditFragment != null) {
+    private void openNewFragments() {
+        openNotesList();
+        if(activeNote != null){
+            openNoteItem(activeNote, positionNote, false);
+        }
+    }
+
+    private void removeOldNoteFragments() {
+        removeFragment(NOTE_EDIT_TAG);
+        removeFragment(NOTE_LIST_TAG);
+    }
+
+    private void removeFragment(String fragmentTag) {
+        NoteFragments noteFragment = (NoteFragments) fragmentManager.findFragmentByTag(fragmentTag);
+        if (noteFragment != null) {
             fragmentManager
                     .beginTransaction()
-                    .remove(noteEditFragment)
+                    .remove((Fragment) noteFragment)
                     .commit();
         }
     }

@@ -18,7 +18,7 @@ import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
 
-public class NoteListFragment extends Fragment {
+public class NoteListFragment extends Fragment implements NoteFragments {
 
     private final NotesAdapter adapter = new NotesAdapter();
     private RecyclerView recyclerView;
