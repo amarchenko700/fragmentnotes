@@ -25,7 +25,6 @@ public class NoteListFragment extends Fragment {
     private NotesRepoImpl notesRepo;
     private ControllerNoteList controllerNoteList;
     private NoteEntity clickedNote;
-    private int indexClicked;
 
     public static NoteListFragment newInstance() {
         NoteListFragment fragment = new NoteListFragment();
@@ -81,7 +80,6 @@ public class NoteListFragment extends Fragment {
              Думал, что метода адаптера notifyItemRemoved хватит, но увы.
              */
             setAdapterData();
-            adapter.notifyItemRemoved(indexClicked);
             return true;
         }
         return super.onContextItemSelected(item);
@@ -94,7 +92,6 @@ public class NoteListFragment extends Fragment {
 
     private boolean onItemContextClick(View v, NoteEntity item, int position) {
         clickedNote = item;
-        indexClicked = position;
         v.showContextMenu();
         return true;
     }
