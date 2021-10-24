@@ -87,6 +87,17 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         openNewNoteFragments();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            DialogExitApp dialogFragment = new DialogExitApp();
+            dialogFragment.show(getSupportFragmentManager(), null);
+        } else {
+            activeNote = null;
+            super.onBackPressed();
+        }
+    }
+
     private void openNewNoteFragments() {
         openNotesList();
         if (activeNote != null) {
@@ -95,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void removeOldNoteFragments() {
-        removeFragment(NOTE_EDIT_TAG);
         removeFragment(NOTE_LIST_TAG);
     }
 
@@ -106,34 +116,10 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                     .beginTransaction()
                     .remove((Fragment) noteFragment)
                     .commit();
+            if(fragmentTag == NOTE_EDIT_TAG){
+                getSupportFragmentManager().popBackStack();
+            }
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (activeNote != null) {
-            activeNote = null;
-            super.onBackPressed();
-        } else {
-            DialogExitApp dialogFragment = new DialogExitApp();
-            dialogFragment.show(getSupportFragmentManager(), null);
-//            new AlertDialog.Builder(this)
-//                    .setTitle(R.string.exitTitle)
-//                    .setIcon(R.drawable.ic_exit)
-//                    .setMessage(R.string.messageToExit)
-//                    .setPositiveButton(R.string.textYes, (dialog, which) -> exitFromApp())
-//                    .setNegativeButton(R.string.textNo, ((dialog, which) -> showToast(getApplicationContext(), R.string.appContinues)))
-//                    .show();
-        }
-    }
-
-    private void exitFromApp() {
-        showToast(getApplicationContext(), R.string.textAppClosed);
-        finish();
-    }
-
-    public static void showToast(Context context, int msg) {
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
     }
 
     private void removeAdditionalFragment() {
@@ -252,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     @Override
     public void openNoteItem(@Nullable NoteEntity item, int position, boolean isNew) {
+        removeFragment(NOTE_EDIT_TAG);
         positionNote = position;
         fragmentManager
                 .beginTransaction()
