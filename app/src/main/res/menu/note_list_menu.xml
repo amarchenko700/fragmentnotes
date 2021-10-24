@@ -5,5 +5,11 @@
         android:id="@+id/new_note_menu"
         android:title="@string/title_add_note"
         android:icon="@drawable/ic_add"
-        app:showAsAction="always"></item>
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/clear_note_menu"
+        android:title="@string/title_clear_note"
+        android:icon="@drawable/ic_clear"
+        app:showAsAction="never"/>
 </menu>
