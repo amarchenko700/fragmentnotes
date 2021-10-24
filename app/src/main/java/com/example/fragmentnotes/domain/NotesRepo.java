@@ -9,6 +9,7 @@ public interface NotesRepo {
     @Nullable
     NoteEntity createNote(NoteEntity note);
     NoteEntity getNote(NoteEntity id);
-    boolean removeNote(Integer id);
-    boolean editNote(Integer id, NoteEntity note);
+    boolean removeNote(NoteEntity note);
+    boolean editNote(NoteEntity note);
+    void clearAll();
 }

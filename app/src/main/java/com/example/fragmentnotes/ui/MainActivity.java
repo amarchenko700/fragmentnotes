@@ -1,26 +1,21 @@
 package com.example.fragmentnotes.ui;
 
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
-import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
-import com.example.fragmentnotes.ui.NoteEditFragment;
-import com.example.fragmentnotes.ui.NoteListFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,12 +28,17 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private static final String NOTE_LIST_TAG = "NOTE_LIST_TAG";
     private static final String NOTE_EDIT_TAG = "NOTE_EDIT_TAG";
     private static final String ADDITIONAL_FRAGMENT_TAG = "ADDITIONAL_FRAGMENT_TAG";
+    private static final String ACTIVE_NOTE_KEY = "ACTIVE_NOTE_KEY";
+    private static final String POSITION_NOTE_KEY = "POSITION_NOTE_KEY";
     private boolean isLandscape;
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
     private FragmentManager fragmentManager;
+    private NoteListFragment noteListFragment;
+    private int positionNote;
     private int listLayout;
     private int noteLayout;
+    private NoteEntity activeNote;
     private final Map<Integer, Fragment> fragments = createFragments();
     /*
     Здесь не могу пользоваться типом NotesRepo, как в уроке, т.к. ругается что он не Parcelable.
@@ -52,27 +52,51 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         setContentView(R.layout.activity_main);
 
         setNoteRepository(savedInstanceState);
+        setActiveNote(savedInstanceState);
 
         fragmentManager = getSupportFragmentManager();
+        noteListFragment = NoteListFragment.newInstance();
         initToolbar();
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
         initLayouts();
         initBottomNavigation();
-        openNotesList(notesRepo);
-        removeNoteEditFragment();
+        removeOldNoteFragments();
+        openNewFragments();
     }
 
-    private void removeNoteEditFragment() {
-        NoteEditFragment noteEditFragment = (NoteEditFragment) fragmentManager.findFragmentByTag(NOTE_EDIT_TAG);
-        if (!isLandscape && noteEditFragment != null) {
+    private void openNewFragments() {
+        openNotesList();
+        if(activeNote != null){
+            openNoteItem(activeNote, positionNote, false);
+        }
+    }
+
+    private void removeOldNoteFragments() {
+        removeFragment(NOTE_EDIT_TAG);
+        removeFragment(NOTE_LIST_TAG);
+    }
+
+    private void removeFragment(String fragmentTag) {
+        NoteFragments noteFragment = (NoteFragments) fragmentManager.findFragmentByTag(fragmentTag);
+        if (noteFragment != null) {
             fragmentManager
                     .beginTransaction()
-                    .remove(noteEditFragment)
+                    .remove((Fragment) noteFragment)
                     .commit();
         }
     }
 
-    private Map<Integer, Fragment> createFragments(){
+    private void removeAdditionalFragment() {
+        Fragment additionalFragment = fragmentManager.findFragmentByTag(MainActivity.ADDITIONAL_FRAGMENT_TAG);
+        if (additionalFragment != null) {
+            fragmentManager
+                    .beginTransaction()
+                    .remove(additionalFragment)
+                    .commit();
+        }
+    }
+
+    private Map<Integer, Fragment> createFragments() {
         Map<Integer, Fragment> fragments = new HashMap<>();
 
         fragments.put(R.id.about, new AboutFragment());
@@ -86,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(REPO_KEY, notesRepo);
+        outState.putParcelable(ACTIVE_NOTE_KEY, activeNote);
+        outState.putInt(POSITION_NOTE_KEY, positionNote);
     }
 
     @Override
@@ -98,8 +124,11 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.new_note_menu) {
-            openNoteItem(notesRepo.createNote(new NoteEntity()));
+            openNoteItem(new NoteEntity(), notesRepo.getNotes().size(), true);
             return true;
+        } else if (item.getItemId() == R.id.clear_note_menu) {
+            notesRepo.clearAll();
+            noteListFragment.setAdapterData();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -109,6 +138,13 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
             notesRepo = fillRepoByTestValuesRepo();
         } else {
             notesRepo = savedInstanceState.getParcelable(REPO_KEY);
+        }
+    }
+
+    private void setActiveNote(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            activeNote = savedInstanceState.getParcelable(ACTIVE_NOTE_KEY);
+            positionNote = savedInstanceState.getInt(POSITION_NOTE_KEY);
         }
     }
 
@@ -149,9 +185,9 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private void initBottomNavigation() {
         bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            if(item.getItemId() == R.id.list_notes){
-                openNotesList(notesRepo);
-            }else {
+            if (item.getItemId() == R.id.list_notes) {
+                openNotesList();
+            } else {
                 fragmentManager
                         .beginTransaction()
                         .replace(R.id.container_additional_fragments, Objects.requireNonNull(fragments.get(item.getItemId())), MainActivity.ADDITIONAL_FRAGMENT_TAG)
@@ -161,39 +197,47 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         });
     }
 
-    private NoteListFragment getNoteListFragment() {
-        NoteListFragment noteListFragment = (NoteListFragment) fragmentManager.findFragmentByTag(NOTE_LIST_TAG);
-        if (noteListFragment == null) {
-            noteListFragment = NoteListFragment.newInstance(notesRepo);
-        } else {
-            noteListFragment.setNotesRepo(notesRepo);
-        }
-        noteListFragment.setRecyclerViewAdapterData();
-        return noteListFragment;
-    }
+    private void openNotesList() {
+        removeAdditionalFragment();
 
-    @Override
-    public void openNotesList(NotesRepoImpl notesRepo) {
-        Fragment additionalFragment = fragmentManager.findFragmentByTag(MainActivity.ADDITIONAL_FRAGMENT_TAG);
-        if(additionalFragment != null){
-            fragmentManager
-                    .beginTransaction()
-                    .remove(additionalFragment)
-                    .commit();
-        }
         fragmentManager
                 .beginTransaction()
-                .replace(listLayout, getNoteListFragment(), NOTE_LIST_TAG)
+                .replace(listLayout, noteListFragment, NOTE_LIST_TAG)
                 .commit();
     }
 
     @Override
-    public void openNoteItem(@Nullable NoteEntity item) {
+    public void saveItem(NoteEntity noteEntity, boolean isNew) {
+        if (isLandscape) {
+            if (isNew) {
+                noteListFragment.notifyItemInserted(positionNote);
+            } else {
+                noteListFragment.notifyItemChanged(positionNote);
+            }
+        }else {
+            openNotesList();
+        }
+    }
+
+    @Override
+    public void openNoteItem(@Nullable NoteEntity item, int position, boolean isNew) {
+        positionNote = position;
         fragmentManager
                 .beginTransaction()
-                .replace(noteLayout, NoteEditFragment.newInstance(item, notesRepo), NOTE_EDIT_TAG)
+                .replace(noteLayout, NoteEditFragment.newInstance(item, notesRepo, isNew), NOTE_EDIT_TAG)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Override
+    public NotesRepoImpl getRepo() {
+        return notesRepo;
+    }
+
+    @Override
+    public void setActiveNote(NoteEntity activeNote, int position) {
+        this.activeNote = activeNote;
+        this.positionNote = position;
     }
 
 }

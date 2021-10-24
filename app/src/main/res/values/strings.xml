@@ -10,4 +10,5 @@
     <string name="text_settings_fragment">Это настройки моего приложения "Заметки"</string>
     <string name="text_profile_fragment">Это профили моего приложения "Заметки"</string>
     <string name="list_notes">Заметки</string>
+    <string name="title_clear_note">Очистить все</string>
 </resources>
