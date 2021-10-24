@@ -4,7 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -17,6 +19,12 @@ import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
 import com.example.fragmentnotes.ui.NoteEditFragment;
 import com.example.fragmentnotes.ui.NoteListFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements NoteListFragment.ControllerNoteList,
         NoteEditFragment.ControllerNoteEdit {
@@ -24,11 +32,14 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     public static final String REPO_KEY = "REPO_KEY";
     private static final String NOTE_LIST_TAG = "NOTE_LIST_TAG";
     private static final String NOTE_EDIT_TAG = "NOTE_EDIT_TAG";
+    private static final String ADDITIONAL_FRAGMENT_TAG = "ADDITIONAL_FRAGMENT_TAG";
     private boolean isLandscape;
     private Toolbar toolbar;
+    private BottomNavigationView bottomNavigationView;
     private FragmentManager fragmentManager;
     private int listLayout;
     private int noteLayout;
+    private final Map<Integer, Fragment> fragments = createFragments();
     /*
     Здесь не могу пользоваться типом NotesRepo, как в уроке, т.к. ругается что он не Parcelable.
     Как сделать так, чтобы интерфейс понимался как Parcelable?
@@ -46,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         initToolbar();
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
         initLayouts();
+        initBottomNavigation();
         openNotesList(notesRepo);
         removeNoteEditFragment();
     }
@@ -58,6 +70,16 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                     .remove(noteEditFragment)
                     .commit();
         }
+    }
+
+    private Map<Integer, Fragment> createFragments(){
+        Map<Integer, Fragment> fragments = new HashMap<>();
+
+        fragments.put(R.id.about, new AboutFragment());
+        fragments.put(R.id.settings, new SettingsFragment());
+        fragments.put(R.id.profile, new ProfileFragment());
+
+        return fragments;
     }
 
     @Override
@@ -124,6 +146,21 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         }
     }
 
+    private void initBottomNavigation() {
+        bottomNavigationView = findViewById(R.id.bottom_nav_view);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            if(item.getItemId() == R.id.list_notes){
+                openNotesList(notesRepo);
+            }else {
+                fragmentManager
+                        .beginTransaction()
+                        .replace(R.id.container_additional_fragments, Objects.requireNonNull(fragments.get(item.getItemId())), MainActivity.ADDITIONAL_FRAGMENT_TAG)
+                        .commit();
+            }
+            return true;
+        });
+    }
+
     private NoteListFragment getNoteListFragment() {
         NoteListFragment noteListFragment = (NoteListFragment) fragmentManager.findFragmentByTag(NOTE_LIST_TAG);
         if (noteListFragment == null) {
@@ -137,6 +174,13 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     @Override
     public void openNotesList(NotesRepoImpl notesRepo) {
+        Fragment additionalFragment = fragmentManager.findFragmentByTag(MainActivity.ADDITIONAL_FRAGMENT_TAG);
+        if(additionalFragment != null){
+            fragmentManager
+                    .beginTransaction()
+                    .remove(additionalFragment)
+                    .commit();
+        }
         fragmentManager
                 .beginTransaction()
                 .replace(listLayout, getNoteListFragment(), NOTE_LIST_TAG)
