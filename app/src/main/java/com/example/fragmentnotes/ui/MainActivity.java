@@ -1,5 +1,6 @@
 package com.example.fragmentnotes.ui;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -38,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     Как сделать так, чтобы интерфейс понимался как Parcelable?
     */
     public NotesRepoImpl notesRepo;
-    boolean isItFinish;
     private boolean isLandscape;
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
@@ -114,24 +115,25 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
             activeNote = null;
             super.onBackPressed();
         } else {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.exitTitle)
-                    .setIcon(R.drawable.ic_exit)
-                    .setMessage(R.string.messageToExit)
-                    .setPositiveButton(R.string.textYes, (dialog, which) -> exitFromApp())
-                    .setNegativeButton(R.string.textNo, ((dialog, which) -> showToast(R.string.appContinues)))
-                    .show();
+            DialogExitApp dialogFragment = new DialogExitApp();
+            dialogFragment.show(getSupportFragmentManager(), null);
+//            new AlertDialog.Builder(this)
+//                    .setTitle(R.string.exitTitle)
+//                    .setIcon(R.drawable.ic_exit)
+//                    .setMessage(R.string.messageToExit)
+//                    .setPositiveButton(R.string.textYes, (dialog, which) -> exitFromApp())
+//                    .setNegativeButton(R.string.textNo, ((dialog, which) -> showToast(getApplicationContext(), R.string.appContinues)))
+//                    .show();
         }
     }
 
     private void exitFromApp() {
-        showToast(R.string.textAppClosed);
-        super.onDestroy();
+        showToast(getApplicationContext(), R.string.textAppClosed);
         finish();
     }
 
-    private void showToast(int msg) {
-        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+    public static void showToast(Context context, int msg) {
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
     }
 
     private void removeAdditionalFragment() {
