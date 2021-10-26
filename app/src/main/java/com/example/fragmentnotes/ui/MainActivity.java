@@ -18,7 +18,7 @@ import com.example.fragmentnotes.impl.NotesRepoImpl;
 import com.example.fragmentnotes.ui.additioanlFragments.AboutFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.ProfileFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.SettingsFragment;
-import com.example.fragmentnotes.ui.dialogs.DialogExitApp;
+import com.example.fragmentnotes.ui.dialogs.BottomSheetDialogExitApp;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.HashMap;
@@ -90,8 +90,11 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            DialogExitApp dialogFragment = new DialogExitApp();
-            dialogFragment.show(getSupportFragmentManager(), null);
+//            DialogExitApp dialogFragment = new DialogExitApp();
+//            dialogFragment.show(getSupportFragmentManager(), null);
+
+            BottomSheetDialogExitApp dialogExitApp = new BottomSheetDialogExitApp();
+            dialogExitApp.show(getSupportFragmentManager(), null);
         } else {
             activeNote = null;
             super.onBackPressed();
@@ -220,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                 .beginTransaction()
                 .replace(listLayout, noteListFragment, NOTE_LIST_TAG)
                 .commit();
+
     }
 
     @Override
@@ -231,14 +235,13 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                 noteListFragment.notifyItemChanged(positionNote);
             }
         } else {
-            openNotesList();
+            fragmentManager.popBackStack();
         }
     }
 
     @Override
     public void openNoteItem(@Nullable NoteEntity item, int position, boolean isNew) {
         removeFragment(NOTE_EDIT_TAG);
-        removeFragment(NOTE_LIST_TAG);
         positionNote = position;
         fragmentManager
                 .beginTransaction()
