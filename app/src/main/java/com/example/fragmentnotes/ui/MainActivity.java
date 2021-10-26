@@ -1,18 +1,14 @@
 package com.example.fragmentnotes.ui;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -116,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                     .beginTransaction()
                     .remove((Fragment) noteFragment)
                     .commit();
-            if(fragmentTag == NOTE_EDIT_TAG){
+            if (fragmentTag == NOTE_EDIT_TAG) {
                 getSupportFragmentManager().popBackStack();
             }
         }
@@ -216,7 +212,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     private void openNotesList() {
         removeAdditionalFragment();
-
         fragmentManager
                 .beginTransaction()
                 .replace(listLayout, noteListFragment, NOTE_LIST_TAG)
@@ -239,6 +234,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public void openNoteItem(@Nullable NoteEntity item, int position, boolean isNew) {
         removeFragment(NOTE_EDIT_TAG);
+        removeFragment(NOTE_LIST_TAG);
         positionNote = position;
         fragmentManager
                 .beginTransaction()
