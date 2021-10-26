@@ -1,4 +1,4 @@
-package com.example.fragmentnotes.ui;
+package com.example.fragmentnotes.ui.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;

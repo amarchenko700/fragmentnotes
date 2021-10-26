@@ -15,6 +15,10 @@ import androidx.fragment.app.FragmentManager;
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
+import com.example.fragmentnotes.ui.additioanlFragments.AboutFragment;
+import com.example.fragmentnotes.ui.additioanlFragments.ProfileFragment;
+import com.example.fragmentnotes.ui.additioanlFragments.SettingsFragment;
+import com.example.fragmentnotes.ui.dialogs.DialogExitApp;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.HashMap;

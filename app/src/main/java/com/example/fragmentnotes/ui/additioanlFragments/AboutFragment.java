@@ -1,4 +1,4 @@
-package com.example.fragmentnotes.ui;
+package com.example.fragmentnotes.ui.additioanlFragments;
 
 import android.os.Bundle;
 
@@ -10,14 +10,14 @@ import android.view.ViewGroup;
 
 import com.example.fragmentnotes.R;
 
-public class SettingsFragment extends Fragment {
+public class AboutFragment extends Fragment {
 
-    public SettingsFragment() {
+    public AboutFragment() {
         // Required empty public constructor
     }
 
-    public static SettingsFragment newInstance() {
-        SettingsFragment fragment = new SettingsFragment();
+    public static AboutFragment newInstance() {
+        AboutFragment fragment = new AboutFragment();
         return fragment;
     }
 
@@ -29,6 +29,6 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        return inflater.inflate(R.layout.fragment_about, container, false);
     }
 }

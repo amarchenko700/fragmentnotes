@@ -1,4 +1,4 @@
-package com.example.fragmentnotes.ui;
+package com.example.fragmentnotes.ui.recycler;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
