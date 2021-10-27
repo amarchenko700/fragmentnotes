@@ -20,6 +20,7 @@ import com.example.fragmentnotes.ui.additioanlFragments.ProfileFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.SettingsFragment;
 import com.example.fragmentnotes.ui.dialogs.DialogExitApp;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
             DialogExitApp dialogFragment = new DialogExitApp();
+            dialogFragment.setView(this.findViewById(android.R.id.content));
             dialogFragment.show(getSupportFragmentManager(), null);
         } else {
             activeNote = null;
