@@ -18,7 +18,7 @@ import com.example.fragmentnotes.impl.NotesRepoImpl;
 import com.example.fragmentnotes.ui.additioanlFragments.AboutFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.ProfileFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.SettingsFragment;
-import com.example.fragmentnotes.ui.dialogs.BottomSheetDialogExitApp;
+import com.example.fragmentnotes.ui.dialogs.DialogExitApp;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.HashMap;
@@ -90,11 +90,8 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-//            DialogExitApp dialogFragment = new DialogExitApp();
-//            dialogFragment.show(getSupportFragmentManager(), null);
-
-            BottomSheetDialogExitApp dialogExitApp = new BottomSheetDialogExitApp();
-            dialogExitApp.show(getSupportFragmentManager(), null);
+            DialogExitApp dialogFragment = new DialogExitApp();
+            dialogFragment.show(getSupportFragmentManager(), null);
         } else {
             activeNote = null;
             super.onBackPressed();
