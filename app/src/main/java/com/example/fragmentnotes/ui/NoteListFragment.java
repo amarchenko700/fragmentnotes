@@ -15,12 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fragmentnotes.R;
+import com.example.fragmentnotes.databinding.FragmentNoteListBinding;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
 import com.example.fragmentnotes.ui.recycler.NotesAdapter;
 
 public class NoteListFragment extends Fragment implements NoteFragments {
-
+    private FragmentNoteListBinding binding;
     private final NotesAdapter adapter = new NotesAdapter();
     private RecyclerView recyclerView;
     private NotesRepoImpl notesRepo;
@@ -45,7 +46,8 @@ public class NoteListFragment extends Fragment implements NoteFragments {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_note_list, container, false);
+        binding = FragmentNoteListBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -98,9 +100,8 @@ public class NoteListFragment extends Fragment implements NoteFragments {
     }
 
     private void initRecyclerView() {
-        recyclerView = getView().findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(this::onItemClick);
         adapter.setOnItemContextClickListener(this::onItemContextClick);
     }
@@ -126,4 +127,9 @@ public class NoteListFragment extends Fragment implements NoteFragments {
         void setActiveNote(NoteEntity activeNote, int position);
     }
 
+    @Override
+    public void onDestroyView() {
+        binding = null;
+        super.onDestroyView();
+    }
 }

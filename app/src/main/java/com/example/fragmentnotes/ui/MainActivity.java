@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.fragmentnotes.R;
+import com.example.fragmentnotes.databinding.ActivityMainBinding;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
 import com.example.fragmentnotes.ui.additioanlFragments.AboutFragment;
@@ -20,7 +21,6 @@ import com.example.fragmentnotes.ui.additioanlFragments.ProfileFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.SettingsFragment;
 import com.example.fragmentnotes.ui.dialogs.DialogExitApp;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     Как сделать так, чтобы интерфейс понимался как Parcelable?
     */
     public NotesRepoImpl notesRepo;
+    private ActivityMainBinding binding;
     private boolean isLandscape;
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
@@ -73,18 +74,18 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         setNoteRepository(savedInstanceState);
         restoreActiveNote(savedInstanceState);
 
         fragmentManager = getSupportFragmentManager();
         noteListFragment = NoteListFragment.newInstance();
-        initToolbar();
+        setSupportActionBar(binding.toolbar);
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
         initLayouts();
         initBottomNavigation();
-        removeOldNoteFragments();
         openNewNoteFragments();
     }
 
@@ -101,14 +102,12 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void openNewNoteFragments() {
-        openNotesList();
+        if (fragmentManager.findFragmentByTag(NOTE_LIST_TAG) == null) {
+            openNotesList();
+        }
         if (activeNote != null) {
             openNoteItem(activeNote, positionNote, false);
         }
-    }
-
-    private void removeOldNoteFragments() {
-        removeFragment(NOTE_LIST_TAG);
     }
 
     private void removeFragment(String fragmentTag) {
@@ -186,11 +185,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         }
     }
 
-    private void initToolbar() {
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-    }
-
     private void initLayouts() {
         if (isLandscape) {
             listLayout = R.id.fragment_container;
@@ -202,8 +196,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void initBottomNavigation() {
-        bottomNavigationView = findViewById(R.id.bottom_nav_view);
-        bottomNavigationView.setOnItemSelectedListener(item -> {
+        binding.bottomNavView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.list_notes) {
                 openNotesList();
             } else {
