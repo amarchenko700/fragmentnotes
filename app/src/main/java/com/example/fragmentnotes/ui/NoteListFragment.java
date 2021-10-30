@@ -12,25 +12,26 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.databinding.FragmentNoteListBinding;
 import com.example.fragmentnotes.domain.NoteEntity;
-import com.example.fragmentnotes.impl.NotesRepoImpl;
+import com.example.fragmentnotes.domain.NotesRepo;
 import com.example.fragmentnotes.ui.recycler.NotesAdapter;
 
 public class NoteListFragment extends Fragment implements NoteFragments {
-    private FragmentNoteListBinding binding;
+    private static NoteListFragment instance;
     private final NotesAdapter adapter = new NotesAdapter();
-    private RecyclerView recyclerView;
-    private NotesRepoImpl notesRepo;
+    private FragmentNoteListBinding binding;
+    private NotesRepo notesRepo;
     private ControllerNoteList controllerNoteList;
     private NoteEntity clickedNote;
 
     public static NoteListFragment newInstance() {
-        NoteListFragment fragment = new NoteListFragment();
-        return fragment;
+        if (instance == null) {
+            instance = new NoteListFragment();
+        }
+        return instance;
     }
 
     @Override
@@ -119,17 +120,17 @@ public class NoteListFragment extends Fragment implements NoteFragments {
         setAdapterData();
     }
 
-    public interface ControllerNoteList {
-        void openNoteItem(NoteEntity item, int position, boolean isNew);
-
-        NotesRepoImpl getRepo();
-
-        void setActiveNote(NoteEntity activeNote, int position);
-    }
-
     @Override
     public void onDestroyView() {
         binding = null;
         super.onDestroyView();
+    }
+
+    public interface ControllerNoteList {
+        void openNoteItem(NoteEntity item, int position, boolean isNew);
+
+        NotesRepo getRepo();
+
+        void setActiveNote(NoteEntity activeNote, int position);
     }
 }

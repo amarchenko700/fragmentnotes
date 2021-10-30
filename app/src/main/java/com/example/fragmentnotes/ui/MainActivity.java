@@ -15,7 +15,7 @@ import androidx.fragment.app.FragmentManager;
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.databinding.ActivityMainBinding;
 import com.example.fragmentnotes.domain.NoteEntity;
-import com.example.fragmentnotes.impl.NotesRepoImpl;
+import com.example.fragmentnotes.domain.NotesRepo;
 import com.example.fragmentnotes.ui.additioanlFragments.AboutFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.ProfileFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.SettingsFragment;
@@ -29,18 +29,13 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity implements NoteListFragment.ControllerNoteList,
         NoteEditFragment.ControllerNoteEdit {
 
-    public static final String REPO_KEY = "REPO_KEY";
     private static final String NOTE_LIST_TAG = "NOTE_LIST_TAG";
     private static final String NOTE_EDIT_TAG = "NOTE_EDIT_TAG";
     private static final String ADDITIONAL_FRAGMENT_TAG = "ADDITIONAL_FRAGMENT_TAG";
     private static final String ACTIVE_NOTE_KEY = "ACTIVE_NOTE_KEY";
     private static final String POSITION_NOTE_KEY = "POSITION_NOTE_KEY";
     private final Map<Integer, Fragment> fragments = createFragments();
-    /*
-    Здесь не могу пользоваться типом NotesRepo, как в уроке, т.к. ругается что он не Parcelable.
-    Как сделать так, чтобы интерфейс понимался как Parcelable?
-    */
-    public NotesRepoImpl notesRepo;
+    public NotesRepo notesRepo;
     private ActivityMainBinding binding;
     private boolean isLandscape;
     private Toolbar toolbar;
@@ -52,32 +47,12 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private int noteLayout;
     private NoteEntity activeNote;
 
-    private static NotesRepoImpl fillRepoByTestValuesRepo() {
-        NotesRepoImpl notesRepo = new NotesRepoImpl();
-        notesRepo.createNote(new NoteEntity("День 1", "Решил заниматься андроидом"));
-        notesRepo.createNote(new NoteEntity("День 2", "Записался на GeekBrains"));
-        notesRepo.createNote(new NoteEntity("День 3", "И пошла жара"));
-        notesRepo.createNote(new NoteEntity("День 4", "Теперь даже некогда отдыхать"));
-        notesRepo.createNote(new NoteEntity("День 5", "Только то и делаю, что что-то клипаю, клипаю и клипаю"));
-        notesRepo.createNote(new NoteEntity("День 6", "Иногда некогда покушать"));
-        notesRepo.createNote(new NoteEntity("День 7", "Но в целом учиться - очень круто"));
-        notesRepo.createNote(new NoteEntity("День 8", "Пишем на Java, скоро Kotlin - в общем мы крутые перцы "));
-        notesRepo.createNote(new NoteEntity("День 9", "Все отлично"));
-        notesRepo.createNote(new NoteEntity("День 10", "Все замечательно"));
-        notesRepo.createNote(new NoteEntity("День 11", "Это такой типа дневник"));
-        notesRepo.createNote(new NoteEntity("День 12", "Почти все"));
-        notesRepo.createNote(new NoteEntity("День 13", "Еще не все"));
-        notesRepo.createNote(new NoteEntity("День 14", "Теперь все"));
-        return notesRepo;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        setNoteRepository(savedInstanceState);
+        notesRepo = (NotesRepo) getApplication();
         restoreActiveNote(savedInstanceState);
 
         fragmentManager = getSupportFragmentManager();
@@ -146,7 +121,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(REPO_KEY, notesRepo);
         outState.putParcelable(ACTIVE_NOTE_KEY, activeNote);
         outState.putInt(POSITION_NOTE_KEY, positionNote);
     }
@@ -168,14 +142,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
             noteListFragment.setAdapterData();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void setNoteRepository(Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            notesRepo = fillRepoByTestValuesRepo();
-        } else {
-            notesRepo = savedInstanceState.getParcelable(REPO_KEY);
-        }
     }
 
     private void restoreActiveNote(Bundle savedInstanceState) {
@@ -243,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     @Override
-    public NotesRepoImpl getRepo() {
+    public NotesRepo getRepo() {
         return notesRepo;
     }
 
