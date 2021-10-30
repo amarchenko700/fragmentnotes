@@ -1,4 +1,4 @@
-package com.example.fragmentnotes.ui;
+package com.example.fragmentnotes.ui.recycler;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,11 +50,11 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
         contextClickListener = contextListener;
     }
 
-    interface onItemClickListener {
+    public interface onItemClickListener {
         void onItemClick(NoteEntity item, int position);
     }
 
-    interface onItemContextClickListener {
+    public interface onItemContextClickListener {
         boolean onItemContextClick(View v, NoteEntity item, int position);
     }
 }

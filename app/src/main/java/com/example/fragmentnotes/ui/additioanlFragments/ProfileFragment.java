@@ -1,4 +1,4 @@
-package com.example.fragmentnotes.ui;
+package com.example.fragmentnotes.ui.additioanlFragments;
 
 import android.os.Bundle;
 

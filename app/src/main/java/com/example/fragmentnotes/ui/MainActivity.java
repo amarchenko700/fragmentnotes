@@ -15,6 +15,10 @@ import androidx.fragment.app.FragmentManager;
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
+import com.example.fragmentnotes.ui.additioanlFragments.AboutFragment;
+import com.example.fragmentnotes.ui.additioanlFragments.ProfileFragment;
+import com.example.fragmentnotes.ui.additioanlFragments.SettingsFragment;
+import com.example.fragmentnotes.ui.dialogs.BottomSheetDialogExitApp;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.HashMap;
@@ -30,6 +34,12 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private static final String ADDITIONAL_FRAGMENT_TAG = "ADDITIONAL_FRAGMENT_TAG";
     private static final String ACTIVE_NOTE_KEY = "ACTIVE_NOTE_KEY";
     private static final String POSITION_NOTE_KEY = "POSITION_NOTE_KEY";
+    private final Map<Integer, Fragment> fragments = createFragments();
+    /*
+    Здесь не могу пользоваться типом NotesRepo, как в уроке, т.к. ругается что он не Parcelable.
+    Как сделать так, чтобы интерфейс понимался как Parcelable?
+    */
+    public NotesRepoImpl notesRepo;
     private boolean isLandscape;
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
@@ -39,12 +49,25 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private int listLayout;
     private int noteLayout;
     private NoteEntity activeNote;
-    private final Map<Integer, Fragment> fragments = createFragments();
-    /*
-    Здесь не могу пользоваться типом NotesRepo, как в уроке, т.к. ругается что он не Parcelable.
-    Как сделать так, чтобы интерфейс понимался как Parcelable?
-    */
-    public NotesRepoImpl notesRepo;
+
+    private static NotesRepoImpl fillRepoByTestValuesRepo() {
+        NotesRepoImpl notesRepo = new NotesRepoImpl();
+        notesRepo.createNote(new NoteEntity("День 1", "Решил заниматься андроидом"));
+        notesRepo.createNote(new NoteEntity("День 2", "Записался на GeekBrains"));
+        notesRepo.createNote(new NoteEntity("День 3", "И пошла жара"));
+        notesRepo.createNote(new NoteEntity("День 4", "Теперь даже некогда отдыхать"));
+        notesRepo.createNote(new NoteEntity("День 5", "Только то и делаю, что что-то клипаю, клипаю и клипаю"));
+        notesRepo.createNote(new NoteEntity("День 6", "Иногда некогда покушать"));
+        notesRepo.createNote(new NoteEntity("День 7", "Но в целом учиться - очень круто"));
+        notesRepo.createNote(new NoteEntity("День 8", "Пишем на Java, скоро Kotlin - в общем мы крутые перцы "));
+        notesRepo.createNote(new NoteEntity("День 9", "Все отлично"));
+        notesRepo.createNote(new NoteEntity("День 10", "Все замечательно"));
+        notesRepo.createNote(new NoteEntity("День 11", "Это такой типа дневник"));
+        notesRepo.createNote(new NoteEntity("День 12", "Почти все"));
+        notesRepo.createNote(new NoteEntity("День 13", "Еще не все"));
+        notesRepo.createNote(new NoteEntity("День 14", "Теперь все"));
+        return notesRepo;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         setContentView(R.layout.activity_main);
 
         setNoteRepository(savedInstanceState);
-        setActiveNote(savedInstanceState);
+        restoreActiveNote(savedInstanceState);
 
         fragmentManager = getSupportFragmentManager();
         noteListFragment = NoteListFragment.newInstance();
@@ -61,18 +84,31 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         initLayouts();
         initBottomNavigation();
         removeOldNoteFragments();
-        openNewFragments();
+        openNewNoteFragments();
     }
 
-    private void openNewFragments() {
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+//            DialogExitApp dialogFragment = new DialogExitApp();
+//            dialogFragment.show(getSupportFragmentManager(), null);
+
+            BottomSheetDialogExitApp dialogExitApp = new BottomSheetDialogExitApp();
+            dialogExitApp.show(getSupportFragmentManager(), null);
+        } else {
+            activeNote = null;
+            super.onBackPressed();
+        }
+    }
+
+    private void openNewNoteFragments() {
         openNotesList();
-        if(activeNote != null){
+        if (activeNote != null) {
             openNoteItem(activeNote, positionNote, false);
         }
     }
 
     private void removeOldNoteFragments() {
-        removeFragment(NOTE_EDIT_TAG);
         removeFragment(NOTE_LIST_TAG);
     }
 
@@ -83,6 +119,9 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                     .beginTransaction()
                     .remove((Fragment) noteFragment)
                     .commit();
+            if (fragmentTag == NOTE_EDIT_TAG) {
+                getSupportFragmentManager().popBackStack();
+            }
         }
     }
 
@@ -141,30 +180,11 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         }
     }
 
-    private void setActiveNote(Bundle savedInstanceState) {
+    private void restoreActiveNote(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             activeNote = savedInstanceState.getParcelable(ACTIVE_NOTE_KEY);
             positionNote = savedInstanceState.getInt(POSITION_NOTE_KEY);
         }
-    }
-
-    private static NotesRepoImpl fillRepoByTestValuesRepo() {
-        NotesRepoImpl notesRepo = new NotesRepoImpl();
-        notesRepo.createNote(new NoteEntity("День 1", "Решил заниматься андроидом"));
-        notesRepo.createNote(new NoteEntity("День 2", "Записался на GeekBrains"));
-        notesRepo.createNote(new NoteEntity("День 3", "И пошла жара"));
-        notesRepo.createNote(new NoteEntity("День 4", "Теперь даже некогда отдыхать"));
-        notesRepo.createNote(new NoteEntity("День 5", "Только то и делаю, что что-то клипаю, клипаю и клипаю"));
-        notesRepo.createNote(new NoteEntity("День 6", "Иногда некогда покушать"));
-        notesRepo.createNote(new NoteEntity("День 7", "Но в целом учиться - очень круто"));
-        notesRepo.createNote(new NoteEntity("День 8", "Пишем на Java, скоро Kotlin - в общем мы крутые перцы "));
-        notesRepo.createNote(new NoteEntity("День 9", "Все отлично"));
-        notesRepo.createNote(new NoteEntity("День 10", "Все замечательно"));
-        notesRepo.createNote(new NoteEntity("День 11", "Это такой типа дневник"));
-        notesRepo.createNote(new NoteEntity("День 12", "Почти все"));
-        notesRepo.createNote(new NoteEntity("День 13", "Еще не все"));
-        notesRepo.createNote(new NoteEntity("День 14", "Теперь все"));
-        return notesRepo;
     }
 
     private void initToolbar() {
@@ -199,11 +219,11 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     private void openNotesList() {
         removeAdditionalFragment();
-
         fragmentManager
                 .beginTransaction()
                 .replace(listLayout, noteListFragment, NOTE_LIST_TAG)
                 .commit();
+
     }
 
     @Override
@@ -214,13 +234,14 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
             } else {
                 noteListFragment.notifyItemChanged(positionNote);
             }
-        }else {
-            openNotesList();
+        } else {
+            fragmentManager.popBackStack();
         }
     }
 
     @Override
     public void openNoteItem(@Nullable NoteEntity item, int position, boolean isNew) {
+        removeFragment(NOTE_EDIT_TAG);
         positionNote = position;
         fragmentManager
                 .beginTransaction()

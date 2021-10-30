@@ -11,4 +11,10 @@
     <string name="text_profile_fragment">Это профили моего приложения "Заметки"</string>
     <string name="list_notes">Заметки</string>
     <string name="title_clear_note">Очистить все</string>
+    <string name="exitTitle">Выход из приложения</string>
+    <string name="messageToExit">Вы действительно хотите выйти из приложения?</string>
+    <string name="textYes">Да</string>
+    <string name="textNo">Нет</string>
+    <string name="textAppClosed">Приложение Заметки закрыто</string>
+    <string name="appContinues">Приложение продолжает работать</string>
 </resources>

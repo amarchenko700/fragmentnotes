@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.impl.NotesRepoImpl;
+import com.example.fragmentnotes.ui.recycler.NotesAdapter;
 
 public class NoteListFragment extends Fragment implements NoteFragments {
 
