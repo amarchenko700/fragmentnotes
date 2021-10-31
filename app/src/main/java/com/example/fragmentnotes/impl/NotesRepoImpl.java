@@ -1,22 +1,32 @@
 package com.example.fragmentnotes.impl;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.app.Application;
 
 import androidx.annotation.Nullable;
-
-
 import com.example.fragmentnotes.domain.NoteEntity;
 import com.example.fragmentnotes.domain.NotesRepo;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotesRepoImpl implements NotesRepo, Parcelable {
+public class NotesRepoImpl extends Application implements NotesRepo{
     private ArrayList<NoteEntity> cache = new ArrayList<>();
     private int counter = 0;
 
     public NotesRepoImpl() {
+        this.createNote(new NoteEntity("День 1", "Решил заниматься андроидом"));
+        this.createNote(new NoteEntity("День 2", "Записался на GeekBrains"));
+        this.createNote(new NoteEntity("День 3", "И пошла жара"));
+        this.createNote(new NoteEntity("День 4", "Теперь даже некогда отдыхать"));
+        this.createNote(new NoteEntity("День 5", "Только то и делаю, что что-то клипаю, клипаю и клипаю"));
+        this.createNote(new NoteEntity("День 6", "Иногда некогда покушать"));
+        this.createNote(new NoteEntity("День 7", "Но в целом учиться - очень круто"));
+        this.createNote(new NoteEntity("День 8", "Пишем на Java, скоро Kotlin - в общем мы крутые перцы "));
+        this.createNote(new NoteEntity("День 9", "Все отлично"));
+        this.createNote(new NoteEntity("День 10", "Все замечательно"));
+        this.createNote(new NoteEntity("День 11", "Это такой типа дневник"));
+        this.createNote(new NoteEntity("День 12", "Почти все"));
+        this.createNote(new NoteEntity("День 13", "Еще не все"));
+        this.createNote(new NoteEntity("День 14", "Теперь все"));
     }
 
     @Override
@@ -52,36 +62,9 @@ public class NotesRepoImpl implements NotesRepo, Parcelable {
         return true;
     }
 
+    @Override
     public void clearAll(){
         counter = 0;
         cache.clear();
-    }
-
-    public NotesRepoImpl(Parcel in) {
-        cache = in.createTypedArrayList(NoteEntity.CREATOR);
-        counter = in.readInt();
-    }
-
-    public static final Creator<NotesRepoImpl> CREATOR = new Creator<NotesRepoImpl>() {
-        @Override
-        public NotesRepoImpl createFromParcel(Parcel in) {
-            return new NotesRepoImpl(in);
-        }
-
-        @Override
-        public NotesRepoImpl[] newArray(int size) {
-            return new NotesRepoImpl[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeTypedList(cache);
-        dest.writeInt(counter);
     }
 }

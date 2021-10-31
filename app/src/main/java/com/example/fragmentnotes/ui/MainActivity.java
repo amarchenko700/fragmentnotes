@@ -8,18 +8,17 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.fragmentnotes.R;
+import com.example.fragmentnotes.databinding.ActivityMainBinding;
 import com.example.fragmentnotes.domain.NoteEntity;
-import com.example.fragmentnotes.impl.NotesRepoImpl;
+import com.example.fragmentnotes.domain.NotesRepo;
 import com.example.fragmentnotes.ui.additioanlFragments.AboutFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.ProfileFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.SettingsFragment;
-import com.example.fragmentnotes.ui.dialogs.BottomSheetDialogExitApp;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.fragmentnotes.ui.dialogs.DialogExitApp;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,21 +27,16 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity implements NoteListFragment.ControllerNoteList,
         NoteEditFragment.ControllerNoteEdit {
 
-    public static final String REPO_KEY = "REPO_KEY";
     private static final String NOTE_LIST_TAG = "NOTE_LIST_TAG";
     private static final String NOTE_EDIT_TAG = "NOTE_EDIT_TAG";
     private static final String ADDITIONAL_FRAGMENT_TAG = "ADDITIONAL_FRAGMENT_TAG";
     private static final String ACTIVE_NOTE_KEY = "ACTIVE_NOTE_KEY";
+    private static final String NOTE_LIST_FRAGMENT_KEY = "NOTE_LIST_FRAGMENT_KEY";
     private static final String POSITION_NOTE_KEY = "POSITION_NOTE_KEY";
     private final Map<Integer, Fragment> fragments = createFragments();
-    /*
-    Здесь не могу пользоваться типом NotesRepo, как в уроке, т.к. ругается что он не Parcelable.
-    Как сделать так, чтобы интерфейс понимался как Parcelable?
-    */
-    public NotesRepoImpl notesRepo;
+    public NotesRepo notesRepo;
+    private ActivityMainBinding binding;
     private boolean isLandscape;
-    private Toolbar toolbar;
-    private BottomNavigationView bottomNavigationView;
     private FragmentManager fragmentManager;
     private NoteListFragment noteListFragment;
     private int positionNote;
@@ -50,51 +44,30 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private int noteLayout;
     private NoteEntity activeNote;
 
-    private static NotesRepoImpl fillRepoByTestValuesRepo() {
-        NotesRepoImpl notesRepo = new NotesRepoImpl();
-        notesRepo.createNote(new NoteEntity("День 1", "Решил заниматься андроидом"));
-        notesRepo.createNote(new NoteEntity("День 2", "Записался на GeekBrains"));
-        notesRepo.createNote(new NoteEntity("День 3", "И пошла жара"));
-        notesRepo.createNote(new NoteEntity("День 4", "Теперь даже некогда отдыхать"));
-        notesRepo.createNote(new NoteEntity("День 5", "Только то и делаю, что что-то клипаю, клипаю и клипаю"));
-        notesRepo.createNote(new NoteEntity("День 6", "Иногда некогда покушать"));
-        notesRepo.createNote(new NoteEntity("День 7", "Но в целом учиться - очень круто"));
-        notesRepo.createNote(new NoteEntity("День 8", "Пишем на Java, скоро Kotlin - в общем мы крутые перцы "));
-        notesRepo.createNote(new NoteEntity("День 9", "Все отлично"));
-        notesRepo.createNote(new NoteEntity("День 10", "Все замечательно"));
-        notesRepo.createNote(new NoteEntity("День 11", "Это такой типа дневник"));
-        notesRepo.createNote(new NoteEntity("День 12", "Почти все"));
-        notesRepo.createNote(new NoteEntity("День 13", "Еще не все"));
-        notesRepo.createNote(new NoteEntity("День 14", "Теперь все"));
-        return notesRepo;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        setNoteRepository(savedInstanceState);
-        restoreActiveNote(savedInstanceState);
-
+        notesRepo = (NotesRepo) getApplication();
         fragmentManager = getSupportFragmentManager();
-        noteListFragment = NoteListFragment.newInstance();
-        initToolbar();
+
+        restoreActivity(savedInstanceState);
+
+        setSupportActionBar(binding.toolbar);
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
         initLayouts();
         initBottomNavigation();
-        removeOldNoteFragments();
         openNewNoteFragments();
     }
 
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-//            DialogExitApp dialogFragment = new DialogExitApp();
-//            dialogFragment.show(getSupportFragmentManager(), null);
-
-            BottomSheetDialogExitApp dialogExitApp = new BottomSheetDialogExitApp();
-            dialogExitApp.show(getSupportFragmentManager(), null);
+            DialogExitApp dialogFragment = new DialogExitApp();
+            dialogFragment.setView(this.findViewById(android.R.id.content));
+            dialogFragment.show(getSupportFragmentManager(), null);
         } else {
             activeNote = null;
             super.onBackPressed();
@@ -102,14 +75,12 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void openNewNoteFragments() {
-        openNotesList();
+        if (fragmentManager.findFragmentByTag(NOTE_LIST_TAG) == null) {
+            openNotesList();
+        }
         if (activeNote != null) {
             openNoteItem(activeNote, positionNote, false);
         }
-    }
-
-    private void removeOldNoteFragments() {
-        removeFragment(NOTE_LIST_TAG);
     }
 
     private void removeFragment(String fragmentTag) {
@@ -148,8 +119,8 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(REPO_KEY, notesRepo);
         outState.putParcelable(ACTIVE_NOTE_KEY, activeNote);
+        outState.putParcelable(NOTE_LIST_FRAGMENT_KEY, noteListFragment);
         outState.putInt(POSITION_NOTE_KEY, positionNote);
     }
 
@@ -172,24 +143,14 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         return super.onOptionsItemSelected(item);
     }
 
-    private void setNoteRepository(Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            notesRepo = fillRepoByTestValuesRepo();
-        } else {
-            notesRepo = savedInstanceState.getParcelable(REPO_KEY);
-        }
-    }
-
-    private void restoreActiveNote(Bundle savedInstanceState) {
+    private void restoreActivity(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             activeNote = savedInstanceState.getParcelable(ACTIVE_NOTE_KEY);
             positionNote = savedInstanceState.getInt(POSITION_NOTE_KEY);
+            noteListFragment = savedInstanceState.getParcelable(NOTE_LIST_FRAGMENT_KEY);
+        } else {
+            noteListFragment = new NoteListFragment(notesRepo);
         }
-    }
-
-    private void initToolbar() {
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
     }
 
     private void initLayouts() {
@@ -203,8 +164,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     private void initBottomNavigation() {
-        bottomNavigationView = findViewById(R.id.bottom_nav_view);
-        bottomNavigationView.setOnItemSelectedListener(item -> {
+        binding.bottomNavView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.list_notes) {
                 openNotesList();
             } else {
@@ -223,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                 .beginTransaction()
                 .replace(listLayout, noteListFragment, NOTE_LIST_TAG)
                 .commit();
-
     }
 
     @Override
@@ -251,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     }
 
     @Override
-    public NotesRepoImpl getRepo() {
+    public NotesRepo getRepo() {
         return notesRepo;
     }
 
@@ -260,5 +219,4 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         this.activeNote = activeNote;
         this.positionNote = position;
     }
-
 }

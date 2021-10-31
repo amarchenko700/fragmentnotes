@@ -2,6 +2,8 @@ package com.example.fragmentnotes.ui;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -12,25 +14,45 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fragmentnotes.R;
+import com.example.fragmentnotes.databinding.FragmentNoteListBinding;
 import com.example.fragmentnotes.domain.NoteEntity;
-import com.example.fragmentnotes.impl.NotesRepoImpl;
+import com.example.fragmentnotes.domain.NotesRepo;
 import com.example.fragmentnotes.ui.recycler.NotesAdapter;
 
-public class NoteListFragment extends Fragment implements NoteFragments {
+public class NoteListFragment extends Fragment implements NoteFragments, Parcelable {
 
-    private final NotesAdapter adapter = new NotesAdapter();
-    private RecyclerView recyclerView;
-    private NotesRepoImpl notesRepo;
+    private static final String ADAPTER_KEY = "ADAPTER_KEY";
+    private NotesAdapter adapter;
+    private FragmentNoteListBinding binding;
+    private NotesRepo notesRepo;
     private ControllerNoteList controllerNoteList;
     private NoteEntity clickedNote;
 
-    public static NoteListFragment newInstance() {
-        NoteListFragment fragment = new NoteListFragment();
-        return fragment;
+    public NoteListFragment() {
+
     }
+
+    public NoteListFragment(NotesRepo notesRepo) {
+        this.notesRepo = notesRepo;
+    }
+
+    protected NoteListFragment(Parcel in) {
+        clickedNote = in.readParcelable(NoteEntity.class.getClassLoader());
+    }
+
+    public static final Creator<NoteListFragment> CREATOR = new Creator<NoteListFragment>() {
+        @Override
+        public NoteListFragment createFromParcel(Parcel in) {
+            return new NoteListFragment(in);
+        }
+
+        @Override
+        public NoteListFragment[] newArray(int size) {
+            return new NoteListFragment[size];
+        }
+    };
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -45,7 +67,8 @@ public class NoteListFragment extends Fragment implements NoteFragments {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_note_list, container, false);
+        binding = FragmentNoteListBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -54,6 +77,11 @@ public class NoteListFragment extends Fragment implements NoteFragments {
         registerForContextMenu(view);
 
         notesRepo = controllerNoteList.getRepo();
+        if(savedInstanceState == null){
+            adapter = new NotesAdapter();
+        }else {
+            adapter = savedInstanceState.getParcelable(ADAPTER_KEY);
+        }
         initRecyclerView();
         setAdapterData();
     }
@@ -98,9 +126,8 @@ public class NoteListFragment extends Fragment implements NoteFragments {
     }
 
     private void initRecyclerView() {
-        recyclerView = getView().findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(this::onItemClick);
         adapter.setOnItemContextClickListener(this::onItemContextClick);
     }
@@ -111,6 +138,7 @@ public class NoteListFragment extends Fragment implements NoteFragments {
 
     public void notifyItemChanged(int position) {
         adapter.notifyItemChanged(position);
+        setAdapterData();
     }
 
     public void notifyItemInserted(int position) {
@@ -118,12 +146,32 @@ public class NoteListFragment extends Fragment implements NoteFragments {
         setAdapterData();
     }
 
+    @Override
+    public void onDestroyView() {
+        binding = null;
+        super.onDestroyView();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(clickedNote, flags);
+    }
+
     public interface ControllerNoteList {
         void openNoteItem(NoteEntity item, int position, boolean isNew);
 
-        NotesRepoImpl getRepo();
+        NotesRepo getRepo();
 
         void setActiveNote(NoteEntity activeNote, int position);
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putParcelable(ADAPTER_KEY, adapter);
+    }
 }

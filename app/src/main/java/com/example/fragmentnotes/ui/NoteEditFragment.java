@@ -14,12 +14,12 @@ import androidx.fragment.app.Fragment;
 
 import com.example.fragmentnotes.R;
 import com.example.fragmentnotes.domain.NoteEntity;
-import com.example.fragmentnotes.impl.NotesRepoImpl;
+import com.example.fragmentnotes.domain.NotesRepo;
 
 public class NoteEditFragment extends Fragment implements NoteFragments {
 
     private NoteEntity noteEntity;
-    private NotesRepoImpl notesRepo;
+    private NotesRepo notesRepo;
     private boolean isNew;
 
     private EditText titleEditText;
@@ -27,6 +27,20 @@ public class NoteEditFragment extends Fragment implements NoteFragments {
     private Button saveButton;
 
     private ControllerNoteEdit controllerNoteEdit;
+
+    public NoteEditFragment() {
+    }
+
+    public NoteEditFragment(NoteEntity noteEntity, NotesRepo notesRepo, boolean isNew) {
+        this.noteEntity = noteEntity;
+        this.notesRepo = notesRepo;
+        this.isNew = isNew;
+    }
+
+    public static NoteEditFragment newInstance(NoteEntity noteEntity, NotesRepo notesRepo,
+                                               boolean isNew) {
+        return new NoteEditFragment(noteEntity, notesRepo, isNew);
+    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -63,15 +77,6 @@ public class NoteEditFragment extends Fragment implements NoteFragments {
         controllerNoteEdit = null;
     }
 
-    public NoteEditFragment() {
-    }
-
-    public NoteEditFragment(NoteEntity noteEntity, NotesRepoImpl notesRepo, boolean isNew) {
-        this.noteEntity = noteEntity;
-        this.notesRepo = notesRepo;
-        this.isNew = isNew;
-    }
-
     private void initTextView(View view) {
         titleEditText = view.findViewById(R.id.title_edit_text);
         detailEditText = view.findViewById(R.id.detail_edit_text);
@@ -86,9 +91,9 @@ public class NoteEditFragment extends Fragment implements NoteFragments {
     private void saveNote() {
         noteEntity.setDescription(detailEditText.getText().toString());
         noteEntity.setTitle(titleEditText.getText().toString());
-        if(isNew){
+        if (isNew) {
             notesRepo.createNote(noteEntity);
-        }else {
+        } else {
             notesRepo.editNote(noteEntity);
         }
         controllerNoteEdit.saveItem(noteEntity, isNew);
@@ -96,10 +101,5 @@ public class NoteEditFragment extends Fragment implements NoteFragments {
 
     public interface ControllerNoteEdit {
         void saveItem(NoteEntity noteEntity, boolean isNew);
-    }
-
-    public static NoteEditFragment newInstance(NoteEntity noteEntity, NotesRepoImpl notesRepo,
-                                               boolean isNew) {
-        return new NoteEditFragment(noteEntity, notesRepo, isNew);
     }
 }
