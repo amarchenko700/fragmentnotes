@@ -1,5 +1,7 @@
 package com.example.fragmentnotes.ui.recycler;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -12,19 +14,31 @@ import com.example.fragmentnotes.ui.NoteListFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
+public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> implements Parcelable {
 
-    private static NotesAdapter instance;
     private List<NoteEntity> data = new ArrayList<>();
     private onItemClickListener clickListener = null;
     private onItemContextClickListener contextClickListener = null;
 
-    public static NotesAdapter newInstance() {
-        if (instance == null) {
-            instance = new NotesAdapter();
-        }
-        return instance;
+    public NotesAdapter(){
+
     }
+
+    public NotesAdapter(Parcel in) {
+        data = in.createTypedArrayList(NoteEntity.CREATOR);
+    }
+
+    public static final Creator<NotesAdapter> CREATOR = new Creator<NotesAdapter>() {
+        @Override
+        public NotesAdapter createFromParcel(Parcel in) {
+            return new NotesAdapter(in);
+        }
+
+        @Override
+        public NotesAdapter[] newArray(int size) {
+            return new NotesAdapter[size];
+        }
+    };
 
     @NonNull
     @Override
@@ -57,6 +71,16 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
 
     public void setOnItemContextClickListener(onItemContextClickListener contextListener) {
         contextClickListener = contextListener;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(data);
     }
 
     public interface onItemClickListener {

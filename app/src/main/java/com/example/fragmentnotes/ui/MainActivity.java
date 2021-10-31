@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -20,7 +19,6 @@ import com.example.fragmentnotes.ui.additioanlFragments.AboutFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.ProfileFragment;
 import com.example.fragmentnotes.ui.additioanlFragments.SettingsFragment;
 import com.example.fragmentnotes.ui.dialogs.DialogExitApp;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     private static final String NOTE_EDIT_TAG = "NOTE_EDIT_TAG";
     private static final String ADDITIONAL_FRAGMENT_TAG = "ADDITIONAL_FRAGMENT_TAG";
     private static final String ACTIVE_NOTE_KEY = "ACTIVE_NOTE_KEY";
+    private static final String NOTE_LIST_FRAGMENT_KEY = "NOTE_LIST_FRAGMENT_KEY";
     private static final String POSITION_NOTE_KEY = "POSITION_NOTE_KEY";
     private final Map<Integer, Fragment> fragments = createFragments();
     public NotesRepo notesRepo;
@@ -50,11 +49,12 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        notesRepo = (NotesRepo) getApplication();
-        restoreActiveNote(savedInstanceState);
 
+        notesRepo = (NotesRepo) getApplication();
         fragmentManager = getSupportFragmentManager();
-        noteListFragment = NoteListFragment.newInstance();
+
+        restoreActivity(savedInstanceState);
+
         setSupportActionBar(binding.toolbar);
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
         initLayouts();
@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(ACTIVE_NOTE_KEY, activeNote);
+        outState.putParcelable(NOTE_LIST_FRAGMENT_KEY, noteListFragment);
         outState.putInt(POSITION_NOTE_KEY, positionNote);
     }
 
@@ -142,10 +143,13 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         return super.onOptionsItemSelected(item);
     }
 
-    private void restoreActiveNote(Bundle savedInstanceState) {
+    private void restoreActivity(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             activeNote = savedInstanceState.getParcelable(ACTIVE_NOTE_KEY);
             positionNote = savedInstanceState.getInt(POSITION_NOTE_KEY);
+            noteListFragment = savedInstanceState.getParcelable(NOTE_LIST_FRAGMENT_KEY);
+        } else {
+            noteListFragment = new NoteListFragment(notesRepo);
         }
     }
 
@@ -179,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                 .beginTransaction()
                 .replace(listLayout, noteListFragment, NOTE_LIST_TAG)
                 .commit();
-
     }
 
     @Override
@@ -216,5 +219,4 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         this.activeNote = activeNote;
         this.positionNote = position;
     }
-
 }
