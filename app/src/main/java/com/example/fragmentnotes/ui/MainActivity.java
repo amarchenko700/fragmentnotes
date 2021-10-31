@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
     public NotesRepo notesRepo;
     private ActivityMainBinding binding;
     private boolean isLandscape;
-    private Toolbar toolbar;
-    private BottomNavigationView bottomNavigationView;
     private FragmentManager fragmentManager;
     private NoteListFragment noteListFragment;
     private int positionNote;

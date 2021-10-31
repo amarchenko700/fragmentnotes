@@ -21,7 +21,7 @@ import com.example.fragmentnotes.ui.recycler.NotesAdapter;
 
 public class NoteListFragment extends Fragment implements NoteFragments {
     private static NoteListFragment instance;
-    private final NotesAdapter adapter = new NotesAdapter();
+    private NotesAdapter adapter = NotesAdapter.newInstance();
     private FragmentNoteListBinding binding;
     private NotesRepo notesRepo;
     private ControllerNoteList controllerNoteList;
@@ -113,6 +113,7 @@ public class NoteListFragment extends Fragment implements NoteFragments {
 
     public void notifyItemChanged(int position) {
         adapter.notifyItemChanged(position);
+//        setAdapterData();
     }
 
     public void notifyItemInserted(int position) {

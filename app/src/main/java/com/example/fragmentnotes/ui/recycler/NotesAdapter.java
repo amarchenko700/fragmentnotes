@@ -7,15 +7,24 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fragmentnotes.domain.NoteEntity;
+import com.example.fragmentnotes.ui.NoteListFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
 
+    private static NotesAdapter instance;
     private List<NoteEntity> data = new ArrayList<>();
     private onItemClickListener clickListener = null;
     private onItemContextClickListener contextClickListener = null;
+
+    public static NotesAdapter newInstance() {
+        if (instance == null) {
+            instance = new NotesAdapter();
+        }
+        return instance;
+    }
 
     @NonNull
     @Override
