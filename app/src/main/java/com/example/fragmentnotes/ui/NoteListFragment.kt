@@ -1,177 +1,171 @@
-package com.example.fragmentnotes.ui;
+package com.example.fragmentnotes.ui
 
-import android.content.Context;
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.Context
+import com.example.fragmentnotes.ui.NoteFragments
+import android.os.Parcelable
+import com.example.fragmentnotes.ui.recycler.NotesAdapter
+import com.example.fragmentnotes.domain.NotesRepo
+import com.example.fragmentnotes.ui.NoteListFragment.ControllerNoteList
+import com.example.fragmentnotes.domain.NoteEntity
+import android.os.Parcel
+import android.os.Bundle
+import com.example.fragmentnotes.ui.NoteListFragment
+import android.view.ContextMenu.ContextMenuInfo
+import com.example.fragmentnotes.R
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.fragmentnotes.ui.recycler.NotesAdapter.onItemClickListener
+import com.example.fragmentnotes.ui.recycler.NotesAdapter.onItemContextClickListener
+import android.os.Parcelable.Creator
+import android.view.*
+import androidx.fragment.app.Fragment
+import com.example.fragmentnotes.databinding.FragmentNoteListBinding
+import java.lang.IllegalStateException
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
+class NoteListFragment : Fragment, NoteFragments, Parcelable {
+    private var adapter: NotesAdapter? = null
+    private var binding: FragmentNoteListBinding? = null
+    private var notesRepo: NotesRepo? = null
+    private var controllerNoteList: ControllerNoteList? = null
+    private var clickedNote: NoteEntity? = null
 
-import com.example.fragmentnotes.R;
-import com.example.fragmentnotes.databinding.FragmentNoteListBinding;
-import com.example.fragmentnotes.domain.NoteEntity;
-import com.example.fragmentnotes.domain.NotesRepo;
-import com.example.fragmentnotes.ui.recycler.NotesAdapter;
-
-public class NoteListFragment extends Fragment implements NoteFragments, Parcelable {
-
-    private static final String ADAPTER_KEY = "ADAPTER_KEY";
-    private NotesAdapter adapter;
-    private FragmentNoteListBinding binding;
-    private NotesRepo notesRepo;
-    private ControllerNoteList controllerNoteList;
-    private NoteEntity clickedNote;
-
-    public NoteListFragment() {
-
+    constructor() {}
+    constructor(notesRepo: NotesRepo?) {
+        this.notesRepo = notesRepo
     }
 
-    public NoteListFragment(NotesRepo notesRepo) {
-        this.notesRepo = notesRepo;
+    protected constructor(`in`: Parcel) {
+        clickedNote = `in`.readParcelable(NoteEntity::class.java.classLoader)
     }
 
-    protected NoteListFragment(Parcel in) {
-        clickedNote = in.readParcelable(NoteEntity.class.getClassLoader());
-    }
-
-    public static final Creator<NoteListFragment> CREATOR = new Creator<NoteListFragment>() {
-        @Override
-        public NoteListFragment createFromParcel(Parcel in) {
-            return new NoteListFragment(in);
-        }
-
-        @Override
-        public NoteListFragment[] newArray(int size) {
-            return new NoteListFragment[size];
-        }
-    };
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (context instanceof ControllerNoteList) {
-            controllerNoteList = (ControllerNoteList) context;
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        controllerNoteList = if (context is ControllerNoteList) {
+            context
         } else {
-            throw new IllegalStateException("Activity must implement NoteListFragment.ControllerNoteList");
+            throw IllegalStateException("Activity must implement NoteListFragment.ControllerNoteList")
         }
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentNoteListBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentNoteListBinding.inflate(inflater, container, false)
+        return binding!!.root
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        registerForContextMenu(view);
-
-        notesRepo = controllerNoteList.getRepo();
-        if(savedInstanceState == null){
-            adapter = new NotesAdapter();
-        }else {
-            adapter = savedInstanceState.getParcelable(ADAPTER_KEY);
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        registerForContextMenu(view)
+        notesRepo = controllerNoteList!!.repo
+        adapter = if (savedInstanceState == null) {
+            NotesAdapter()
+        } else {
+            savedInstanceState.getParcelable(ADAPTER_KEY)
         }
-        initRecyclerView();
-        setAdapterData();
+        initRecyclerView()
+        setAdapterData()
     }
 
-    @Override
-    public void onDestroy() {
-        controllerNoteList = null;
-        super.onDestroy();
+    override fun onDestroy() {
+        controllerNoteList = null
+        super.onDestroy()
     }
 
-    @Override
-    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        requireActivity().getMenuInflater().inflate(R.menu.note_list_context_menu, menu);
+    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        requireActivity().menuInflater.inflate(R.menu.note_list_context_menu, menu)
     }
 
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.delete_note && clickedNote != null) {
-            notesRepo.removeNote(clickedNote);
-            clickedNote = null;
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.delete_note && clickedNote != null) {
+            notesRepo!!.removeNote(clickedNote)
+            clickedNote = null
             /*
              Обязательно ли здесь выставлять адаптеру данные, или есть другой путь?
              Если здесь не выставить данные, то при удалении заметки у меня работает не корректно.
              Думал, что метода адаптера notifyItemRemoved хватит, но увы.
-             */
-            setAdapterData();
-            return true;
+             */setAdapterData()
+            return true
         }
-        return super.onContextItemSelected(item);
+        return super.onContextItemSelected(item)
     }
 
-    private void onItemClick(NoteEntity item, int position) {
-        controllerNoteList.setActiveNote(item, position);
-        controllerNoteList.openNoteItem(item, position, false);
+    private fun onItemClick(item: NoteEntity, position: Int) {
+        controllerNoteList!!.setActiveNote(item, position)
+        controllerNoteList!!.openNoteItem(item, position, false)
     }
 
-    private boolean onItemContextClick(View v, NoteEntity item, int position) {
-        clickedNote = item;
-        v.showContextMenu();
-        return true;
+    private fun onItemContextClick(v: View, item: NoteEntity, position: Int): Boolean {
+        clickedNote = item
+        v.showContextMenu()
+        return true
     }
 
-    private void initRecyclerView() {
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerView.setAdapter(adapter);
-        adapter.setOnItemClickListener(this::onItemClick);
-        adapter.setOnItemContextClickListener(this::onItemContextClick);
+    private fun initRecyclerView() {
+        binding!!.recyclerView.layoutManager = LinearLayoutManager(context)
+        binding!!.recyclerView.adapter = adapter
+        adapter!!.setOnItemClickListener { item: NoteEntity, position: Int ->
+            onItemClick(
+                item,
+                position
+            )
+        }
+        adapter!!.setOnItemContextClickListener { v: View, item: NoteEntity, position: Int ->
+            onItemContextClick(
+                v,
+                item,
+                position
+            )
+        }
     }
 
-    public void setAdapterData() {
-        adapter.setData(notesRepo.getNotes());
+    fun setAdapterData() {
+        adapter!!.setData(notesRepo!!.notes)
     }
 
-    public void notifyItemChanged(int position) {
-        adapter.notifyItemChanged(position);
-        setAdapterData();
+    fun notifyItemChanged(position: Int) {
+        adapter!!.notifyItemChanged(position)
+        setAdapterData()
     }
 
-    public void notifyItemInserted(int position) {
-        adapter.notifyItemInserted(position);
-        setAdapterData();
+    fun notifyItemInserted(position: Int) {
+        adapter!!.notifyItemInserted(position)
+        setAdapterData()
     }
 
-    @Override
-    public void onDestroyView() {
-        binding = null;
-        super.onDestroyView();
+    override fun onDestroyView() {
+        binding = null
+        super.onDestroyView()
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    override fun describeContents(): Int {
+        return 0
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(clickedNote, flags);
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeParcelable(clickedNote, flags)
     }
 
-    public interface ControllerNoteList {
-        void openNoteItem(NoteEntity item, int position, boolean isNew);
-
-        NotesRepo getRepo();
-
-        void setActiveNote(NoteEntity activeNote, int position);
+    interface ControllerNoteList {
+        fun openNoteItem(item: NoteEntity?, position: Int, isNew: Boolean)
+        val repo: NotesRepo?
+        fun setActiveNote(activeNote: NoteEntity?, position: Int)
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putParcelable(ADAPTER_KEY, adapter);
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putParcelable(ADAPTER_KEY, adapter)
+    }
+
+    companion object CREATOR : Creator<NoteListFragment> {
+        private const val ADAPTER_KEY = "ADAPTER_KEY"
+        override fun createFromParcel(parcel: Parcel): NoteListFragment {
+            return NoteListFragment(parcel)
+        }
+
+        override fun newArray(size: Int): Array<NoteListFragment?> {
+            return arrayOfNulls(size)
+        }
     }
 }

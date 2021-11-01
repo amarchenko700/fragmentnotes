@@ -1,105 +1,103 @@
-package com.example.fragmentnotes.ui;
+package com.example.fragmentnotes.ui
 
-import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
+import android.content.Context
+import com.example.fragmentnotes.ui.NoteFragments
+import com.example.fragmentnotes.domain.NoteEntity
+import com.example.fragmentnotes.domain.NotesRepo
+import android.widget.EditText
+import com.example.fragmentnotes.ui.NoteEditFragment.ControllerNoteEdit
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import androidx.fragment.app.Fragment
+import com.example.fragmentnotes.R
+import com.example.fragmentnotes.ui.NoteEditFragment
+import java.lang.IllegalStateException
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+class NoteEditFragment : Fragment, NoteFragments {
+    private var noteEntity: NoteEntity? = null
+    private var notesRepo: NotesRepo? = null
+    private var isNew = false
+    private var titleEditText: EditText? = null
+    private var detailEditText: EditText? = null
+    private var saveButton: Button? = null
+    private var controllerNoteEdit: ControllerNoteEdit? = null
 
-import com.example.fragmentnotes.R;
-import com.example.fragmentnotes.domain.NoteEntity;
-import com.example.fragmentnotes.domain.NotesRepo;
-
-public class NoteEditFragment extends Fragment implements NoteFragments {
-
-    private NoteEntity noteEntity;
-    private NotesRepo notesRepo;
-    private boolean isNew;
-
-    private EditText titleEditText;
-    private EditText detailEditText;
-    private Button saveButton;
-
-    private ControllerNoteEdit controllerNoteEdit;
-
-    public NoteEditFragment() {
+    constructor() {}
+    constructor(noteEntity: NoteEntity?, notesRepo: NotesRepo?, isNew: Boolean) {
+        this.noteEntity = noteEntity
+        this.notesRepo = notesRepo
+        this.isNew = isNew
     }
 
-    public NoteEditFragment(NoteEntity noteEntity, NotesRepo notesRepo, boolean isNew) {
-        this.noteEntity = noteEntity;
-        this.notesRepo = notesRepo;
-        this.isNew = isNew;
-    }
-
-    public static NoteEditFragment newInstance(NoteEntity noteEntity, NotesRepo notesRepo,
-                                               boolean isNew) {
-        return new NoteEditFragment(noteEntity, notesRepo, isNew);
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (context instanceof ControllerNoteEdit) {
-            controllerNoteEdit = (ControllerNoteEdit) context;
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        controllerNoteEdit = if (context is ControllerNoteEdit) {
+            context
         } else {
-            throw new IllegalStateException("Activity must implement NoteEditFragment.ControllerNoteEdit");
+            throw IllegalStateException("Activity must implement NoteEditFragment.ControllerNoteEdit")
         }
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_note_edit, container, false);
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_note_edit, container, false)
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        initTextView(view);
-        saveButton.setOnClickListener(v -> saveNote());
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initTextView(view)
+        saveButton!!.setOnClickListener { v: View? -> saveNote() }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        fillNote();
+    override fun onStart() {
+        super.onStart()
+        fillNote()
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        controllerNoteEdit = null;
+    override fun onDestroy() {
+        super.onDestroy()
+        controllerNoteEdit = null
     }
 
-    private void initTextView(View view) {
-        titleEditText = view.findViewById(R.id.title_edit_text);
-        detailEditText = view.findViewById(R.id.detail_edit_text);
-        saveButton = view.findViewById(R.id.save_button);
+    private fun initTextView(view: View) {
+        titleEditText = view.findViewById(R.id.title_edit_text)
+        detailEditText = view.findViewById(R.id.detail_edit_text)
+        saveButton = view.findViewById(R.id.save_button)
     }
 
-    private void fillNote() {
-        titleEditText.setText(noteEntity.getTitle());
-        detailEditText.setText(noteEntity.getDescription());
+    private fun fillNote() {
+        titleEditText!!.setText(noteEntity!!.title)
+        detailEditText!!.setText(noteEntity!!.description)
     }
 
-    private void saveNote() {
-        noteEntity.setDescription(detailEditText.getText().toString());
-        noteEntity.setTitle(titleEditText.getText().toString());
+    private fun saveNote() {
+        noteEntity!!.description = detailEditText!!.text.toString()
+        noteEntity!!.title = titleEditText!!.text.toString()
         if (isNew) {
-            notesRepo.createNote(noteEntity);
+            notesRepo!!.createNote(noteEntity)
         } else {
-            notesRepo.editNote(noteEntity);
+            notesRepo!!.editNote(noteEntity)
         }
-        controllerNoteEdit.saveItem(noteEntity, isNew);
+        controllerNoteEdit!!.saveItem(noteEntity, isNew)
     }
 
-    public interface ControllerNoteEdit {
-        void saveItem(NoteEntity noteEntity, boolean isNew);
+    interface ControllerNoteEdit {
+        fun saveItem(noteEntity: NoteEntity?, isNew: Boolean)
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance(
+            noteEntity: NoteEntity?, notesRepo: NotesRepo?,
+            isNew: Boolean
+        ): NoteEditFragment {
+            return NoteEditFragment(noteEntity, notesRepo, isNew)
+        }
     }
 }
