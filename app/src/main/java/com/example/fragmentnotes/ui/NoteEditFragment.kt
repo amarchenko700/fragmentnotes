@@ -73,14 +73,17 @@ class NoteEditFragment : Fragment, NoteFragments {
     }
 
     private fun saveNote() {
-        noteEntity.description = detailEditText.text.toString()
-        noteEntity.title = titleEditText.text.toString()
+        noteEntity.let {
+            it.description = detailEditText.text.toString()
+            it.title = titleEditText.text.toString()
+        }
         if (isNew) {
             notesRepo.createNote(noteEntity)
         } else {
             notesRepo.editNote(noteEntity)
         }
         controllerNoteEdit!!.saveItem(noteEntity, isNew)
+
     }
 
     interface ControllerNoteEdit {

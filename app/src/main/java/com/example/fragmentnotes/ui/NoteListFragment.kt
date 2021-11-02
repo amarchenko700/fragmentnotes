@@ -87,8 +87,10 @@ class NoteListFragment : Fragment, NoteFragments, Parcelable {
     }
 
     private fun onItemClick(item: NoteEntity, position: Int) {
-        controllerNoteList!!.setActiveNote(item, position)
-        controllerNoteList!!.openNoteItem(item, position, false)
+        controllerNoteList?.let {
+            it.setActiveNote(item, position)
+            it.openNoteItem(item, position, false)
+        }
     }
 
     private fun onItemContextClick(v: View, item: NoteEntity, position: Int): Boolean {
@@ -98,8 +100,10 @@ class NoteListFragment : Fragment, NoteFragments, Parcelable {
     }
 
     private fun initRecyclerView() {
-        binding!!.recyclerView.layoutManager = LinearLayoutManager(context)
-        binding!!.recyclerView.adapter = adapter
+        binding?.let {
+            it.recyclerView.layoutManager = LinearLayoutManager(context)
+            it.recyclerView.adapter = adapter
+        }
         adapter.setOnItemClickListener { item: NoteEntity, position: Int ->
             onItemClick(
                 item,
