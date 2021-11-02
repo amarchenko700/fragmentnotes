@@ -1,34 +1,30 @@
 package com.example.fragmentnotes.ui
 
 import android.content.Context
-import com.example.fragmentnotes.ui.NoteFragments
-import com.example.fragmentnotes.domain.NoteEntity
-import com.example.fragmentnotes.domain.NotesRepo
-import android.widget.EditText
-import com.example.fragmentnotes.ui.NoteEditFragment.ControllerNoteEdit
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import androidx.fragment.app.Fragment
 import com.example.fragmentnotes.R
-import com.example.fragmentnotes.ui.NoteEditFragment
-import java.lang.IllegalStateException
+import com.example.fragmentnotes.domain.NoteEntity
+import com.example.fragmentnotes.domain.NotesRepo
 
 class NoteEditFragment : Fragment, NoteFragments {
-    private var noteEntity: NoteEntity? = null
-    private var notesRepo: NotesRepo? = null
+    private lateinit var noteEntity: NoteEntity
+    private lateinit var notesRepo: NotesRepo
     private var isNew = false
-    private var titleEditText: EditText? = null
-    private var detailEditText: EditText? = null
-    private var saveButton: Button? = null
+    private lateinit var titleEditText: EditText
+    private lateinit var detailEditText: EditText
+    private lateinit var saveButton: Button
     private var controllerNoteEdit: ControllerNoteEdit? = null
 
-    constructor() {}
+    constructor()
     constructor(noteEntity: NoteEntity?, notesRepo: NotesRepo?, isNew: Boolean) {
-        this.noteEntity = noteEntity
-        this.notesRepo = notesRepo
+        this.noteEntity = noteEntity!!
+        this.notesRepo = notesRepo!!
         this.isNew = isNew
     }
 
@@ -52,7 +48,7 @@ class NoteEditFragment : Fragment, NoteFragments {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initTextView(view)
-        saveButton!!.setOnClickListener { v: View? -> saveNote() }
+        saveButton.setOnClickListener { v: View? -> saveNote() }
     }
 
     override fun onStart() {
@@ -72,17 +68,17 @@ class NoteEditFragment : Fragment, NoteFragments {
     }
 
     private fun fillNote() {
-        titleEditText!!.setText(noteEntity!!.title)
-        detailEditText!!.setText(noteEntity!!.description)
+        titleEditText.setText(noteEntity.title)
+        detailEditText.setText(noteEntity.description)
     }
 
     private fun saveNote() {
-        noteEntity!!.description = detailEditText!!.text.toString()
-        noteEntity!!.title = titleEditText!!.text.toString()
+        noteEntity.description = detailEditText.text.toString()
+        noteEntity.title = titleEditText.text.toString()
         if (isNew) {
-            notesRepo!!.createNote(noteEntity)
+            notesRepo.createNote(noteEntity)
         } else {
-            notesRepo!!.editNote(noteEntity)
+            notesRepo.editNote(noteEntity)
         }
         controllerNoteEdit!!.saveItem(noteEntity, isNew)
     }

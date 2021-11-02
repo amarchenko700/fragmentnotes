@@ -16,14 +16,14 @@ import com.example.fragmentnotes.domain.NotesRepo
 import com.example.fragmentnotes.ui.recycler.NotesAdapter
 
 class NoteListFragment : Fragment, NoteFragments, Parcelable {
-    private var adapter: NotesAdapter? = null
+    private lateinit var adapter: NotesAdapter
     private var binding: FragmentNoteListBinding? = null
-    private var notesRepo: NotesRepo? = null
+    private lateinit var notesRepo: NotesRepo
     private var controllerNoteList: ControllerNoteList? = null
     private var clickedNote: NoteEntity? = null
 
-    constructor() {}
-    constructor(notesRepo: NotesRepo?) {
+    constructor()
+    constructor(notesRepo: NotesRepo) {
         this.notesRepo = notesRepo
     }
 
@@ -52,12 +52,12 @@ class NoteListFragment : Fragment, NoteFragments, Parcelable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         registerForContextMenu(view)
-        notesRepo = controllerNoteList!!.repo
+        notesRepo = controllerNoteList!!.repo!!
         adapter = if (savedInstanceState == null) {
             NotesAdapter()
         } else {
             savedInstanceState.getParcelable(ADAPTER_KEY)
-        }
+        }!!
         initRecyclerView()
         setAdapterData()
     }
@@ -74,7 +74,7 @@ class NoteListFragment : Fragment, NoteFragments, Parcelable {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.delete_note && clickedNote != null) {
-            notesRepo!!.removeNote(clickedNote)
+            notesRepo.removeNote(clickedNote)
             clickedNote = null
             /*
              Обязательно ли здесь выставлять адаптеру данные, или есть другой путь?
@@ -100,13 +100,13 @@ class NoteListFragment : Fragment, NoteFragments, Parcelable {
     private fun initRecyclerView() {
         binding!!.recyclerView.layoutManager = LinearLayoutManager(context)
         binding!!.recyclerView.adapter = adapter
-        adapter!!.setOnItemClickListener { item: NoteEntity, position: Int ->
+        adapter.setOnItemClickListener { item: NoteEntity, position: Int ->
             onItemClick(
                 item,
                 position
             )
         }
-        adapter!!.setOnItemContextClickListener { v: View, item: NoteEntity, position: Int ->
+        adapter.setOnItemContextClickListener { v: View, item: NoteEntity, position: Int ->
             onItemContextClick(
                 v,
                 item,
@@ -116,16 +116,16 @@ class NoteListFragment : Fragment, NoteFragments, Parcelable {
     }
 
     fun setAdapterData() {
-        adapter!!.setData(notesRepo!!.notes)
+        adapter.setData(notesRepo.notes)
     }
 
     fun notifyItemChanged(position: Int) {
-        adapter!!.notifyItemChanged(position)
+        adapter.notifyItemChanged(position)
         setAdapterData()
     }
 
     fun notifyItemInserted(position: Int) {
-        adapter!!.notifyItemInserted(position)
+        adapter.notifyItemInserted(position)
         setAdapterData()
     }
 
