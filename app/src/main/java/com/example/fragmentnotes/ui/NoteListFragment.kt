@@ -1,25 +1,19 @@
 package com.example.fragmentnotes.ui
 
 import android.content.Context
-import com.example.fragmentnotes.ui.NoteFragments
-import android.os.Parcelable
-import com.example.fragmentnotes.ui.recycler.NotesAdapter
-import com.example.fragmentnotes.domain.NotesRepo
-import com.example.fragmentnotes.ui.NoteListFragment.ControllerNoteList
-import com.example.fragmentnotes.domain.NoteEntity
-import android.os.Parcel
 import android.os.Bundle
-import com.example.fragmentnotes.ui.NoteListFragment
-import android.view.ContextMenu.ContextMenuInfo
-import com.example.fragmentnotes.R
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.fragmentnotes.ui.recycler.NotesAdapter.onItemClickListener
-import com.example.fragmentnotes.ui.recycler.NotesAdapter.onItemContextClickListener
+import android.os.Parcel
+import android.os.Parcelable
 import android.os.Parcelable.Creator
 import android.view.*
+import android.view.ContextMenu.ContextMenuInfo
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.fragmentnotes.R
 import com.example.fragmentnotes.databinding.FragmentNoteListBinding
-import java.lang.IllegalStateException
+import com.example.fragmentnotes.domain.NoteEntity
+import com.example.fragmentnotes.domain.NotesRepo
+import com.example.fragmentnotes.ui.recycler.NotesAdapter
 
 class NoteListFragment : Fragment, NoteFragments, Parcelable {
     private var adapter: NotesAdapter? = null
